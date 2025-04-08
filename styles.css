@@ -7,7 +7,7 @@
     box-sizing: border-box;
 }
 
-/* Define Color Palette and Fonts (Root variables remain the same) */
+/* Define Color Palette and Fonts */
 :root {
     --primary-color: #800000; /* Deep Maroon */
     --secondary-color: #B8860B; /* DarkGoldenrod (Gold Accent) */
@@ -39,7 +39,7 @@ body {
     background-color: var(--background-light);
     background-image: url('images/subtle-pattern.png'); /* Ensure path is correct */
     background-repeat: repeat;
-    background-attachment: fixed; /* Keep pattern fixed during scroll */
+    background-attachment: fixed;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden; /* Prevent horizontal scroll */
@@ -132,10 +132,12 @@ a:hover { color: var(--primary-color); }
     border-bottom: 1px solid var(--border-color);
     font-weight: 500; color: var(--text-dark);
     font-size: 1rem;
+    position: relative; /* Needed for potential future pseudo-elements, but keep simple */
 }
 .nav-links li:last-child a { border-bottom: none; }
 .nav-links a:hover { background-color: var(--background-light); color: var(--primary-color); }
-.nav-links a::after { display: none; } /* No underline animation on mobile nav */
+/* Ensure no ::after underline is visible on mobile nav */
+.nav-links a::after { display: none; }
 
 /* Mobile Menu Toggle Button (Hamburger) */
 .menu-toggle {
@@ -264,21 +266,79 @@ a:hover { color: var(--primary-color); }
 .slider-btn:disabled { opacity: 0.4; cursor: default; background-color: rgba(200, 200, 200, 0.5); box-shadow: none; } /* Style disabled buttons */
 
 
-/* Contact Section (Mobile First - Stacked) */
+/* --- Contact Section CSS --- */
 .contact-section { background-color: var(--background-light); }
 .contact-container {
     display: grid;
-    grid-template-columns: 1fr; /* Stacked */
+    grid-template-columns: 1fr; /* Stacked on mobile */
     gap: 2rem; /* Adjust gap */
 }
-.contact-details { padding-right: 0; }
-.contact-details h3 { font-size: 1.6rem; margin-bottom: 1rem; }
-.contact-details p { margin-bottom: 1rem; line-height: 1.7; position: relative; padding-left: 30px; /* Space for icon */ }
-.contact-icon { position: absolute; left: 0; top: 5px; color: var(--secondary-color); font-size: 1.1rem; width: 20px; text-align: center; }
+.contact-details { padding-right: 0; } /* No padding needed on mobile */
+.contact-details h3 {
+    color: var(--primary-color);
+    font-size: clamp(1.5rem, 5vw, 1.8rem); /* Responsive heading size */
+    margin-bottom: 1.2rem;
+}
+
+/* Style each contact detail line (p tag) using Flexbox */
+.contact-details p {
+    display: flex;           /* Use Flexbox for layout */
+    align-items: flex-start; /* Align icon to the top of the text block */
+    margin-bottom: 1.2rem;  /* Spacing between lines */
+    font-size: 1rem;
+    line-height: 1.6;       /* Ensure good readability */
+    color: var(--text-light);
+}
+
+.contact-icon {
+    flex-shrink: 0;         /* Prevent icon from shrinking */
+    width: 25px;            /* Fixed width for alignment */
+    font-size: 1.1rem;      /* Icon size */
+    color: var(--secondary-color);
+    margin-right: 12px;     /* Space between icon and text */
+    margin-top: 0.1em;      /* Fine-tune vertical alignment relative to text */
+    text-align: center;     /* Center icon within its width */
+}
+
+/* Style the text content block next to the icon */
+.contact-text {
+    flex-grow: 1;           /* Allow text block to take remaining space */
+}
+
+/* Style the strong tag (label) within the text block */
+.contact-text strong {
+    display: inline-block; /* Or block if needed, handles margin better */
+    color: var(--text-dark);
+    font-weight: 600;
+    margin-right: 0.4em;    /* Space after label (Address:, Phone:, etc.) */
+}
+
+/* Style links within the contact details */
+.contact-text a {
+    color: var(--secondary-color);
+    word-break: break-word; /* Allow long links/emails to wrap */
+}
+.contact-text a:hover {
+    color: var(--primary-color);
+}
+
+/* Remove specific indent classes as they are not needed with this flex setup */
 .contact-details .address-indent,
-.contact-details .hours-indent { display: block; }
+.contact-details .hours-indent {
+    /* No styles needed here, use <br> tags in HTML */
+}
+
+/* Map styling */
 .contact-map { margin-top: 1.5rem; }
-.contact-map iframe { border-radius: 8px; box-shadow: var(--shadow-medium); height: 300px; /* Adjust height */ min-height: 250px; }
+.contact-map iframe {
+    border-radius: 8px;
+    box-shadow: var(--shadow-medium);
+    height: 300px; /* Mobile height */
+    min-height: 250px;
+    width: 100%;    /* Ensure full width */
+    border: none; /* Remove default iframe border */
+}
+/* --- End Contact Section CSS --- */
 
 
 /* Footer (Mobile First) */
@@ -367,15 +427,36 @@ a:hover { color: var(--primary-color); }
     }
     .nav-links li { margin-left: 2rem; width: auto; } /* Add spacing */
     .nav-links a {
-        padding: 0.5rem 0; /* Reset padding */
+        padding: 0.5rem 0; /* Reset padding for desktop nav */
         text-align: left;
         border-bottom: none; /* Remove border */
         font-weight: 600;
+        position: relative; /* Needed for ::after */
+        /* Ensure color is correct */
+        color: var(--text-dark);
+        background-color: transparent; /* Ensure no background from mobile hover */
     }
-    /* Restore hover effect */
-    .nav-links a::after { content: ''; position: absolute; width: 0; height: 2px; bottom: 0; left: 0; background-color: var(--secondary-color); transition: width 0.3s ease; display: block; }
-    .nav-links a:hover::after { width: 100%; }
-    .nav-links a:hover { background-color: transparent; color: var(--primary-color); }
+    /* Restore hover effect for DESKTOP ONLY */
+    .nav-links a::after {
+        content: '';
+        position: absolute;
+        width: 0; /* Start with no width */
+        height: 2px;
+        bottom: -2px; /* Position slightly below the text */
+        left: 0;
+        background-color: var(--secondary-color);
+        transition: width 0.3s ease;
+        display: block; /* Make it visible */
+    }
+    .nav-links a:hover::after {
+        width: 100%; /* Expand width on hover */
+    }
+    /* Explicitly reset hover state from mobile */
+    .nav-links a:hover {
+        background-color: transparent; /* No background change */
+        color: var(--primary-color);   /* Change text color on hover */
+    }
+
 
     /* Hero Section */
      .hero { min-height: 75vh; }
@@ -385,7 +466,7 @@ a:hover { color: var(--primary-color); }
     .gallery-item img { height: 340px; }
 
     /* Contact Section */
-    .contact-container { grid-template-columns: 1fr 1.2fr; /* Side-by-side */ gap: 2.5rem; }
+    .contact-container { grid-template-columns: 1fr 1.2fr; /* Side-by-side */ gap: 2.5rem; align-items: flex-start; } /* Align items to top */
     .contact-map { margin-top: 0; } /* Remove top margin */
     .contact-map iframe { height: 400px; min-height: 380px; }
 }
