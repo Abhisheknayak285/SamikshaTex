@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
         menuToggle.addEventListener('click', () => {
             menuToggle.classList.toggle('is-active');
             navLinks.classList.toggle('active');
+            // Prevent body scroll when mobile menu is open
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
         });
 
         // Close menu when a link is clicked
@@ -16,6 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
                  if (navLinks.classList.contains('active')) {
                     menuToggle.classList.remove('is-active');
                     navLinks.classList.remove('active');
+                    document.body.style.overflow = ''; // Restore scroll
                  }
             });
         });
@@ -28,46 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (navLinks.classList.contains('active') && !isClickInsideNav && !isClickOnToggle) {
                 menuToggle.classList.remove('is-active');
                 navLinks.classList.remove('active');
+                document.body.style.overflow = ''; // Restore scroll
             }
-        });
-    }
-
-
-    // --- Saree Gallery Filtering ---
-    const filterButtons = document.querySelectorAll('.filter-btn');
-    const galleryItems = document.querySelectorAll('.gallery-item');
-
-    if (filterButtons.length > 0 && galleryItems.length > 0) {
-        // Initially add animation class to all items for Intersection Observer
-        galleryItems.forEach(item => item.classList.add('animate-on-scroll', 'fade-in'));
-
-        filterButtons.forEach(button => {
-            button.addEventListener('click', () => {
-                const filter = button.getAttribute('data-filter');
-
-                // Update active button state
-                filterButtons.forEach(btn => btn.classList.remove('active'));
-                button.classList.add('active');
-
-                // Show/Hide gallery items
-                galleryItems.forEach(item => {
-                    const itemCategory = item.getAttribute('data-category');
-                    // Temporarily remove animation visibility classes to re-trigger if needed
-                    item.classList.remove('is-visible');
-
-                    if (filter === 'all' || filter === itemCategory) {
-                        item.style.display = 'flex'; // Use flex as defined in CSS for gallery items
-                        // Re-add animation classes for observer
-                        item.classList.add('animate-on-scroll', 'fade-in');
-                    } else {
-                        item.style.display = 'none';
-                        item.classList.remove('animate-on-scroll', 'fade-in'); // Remove if hidden
-                    }
-                });
-
-                // Re-trigger Intersection Observer for newly displayed items
-                observeElements();
-            });
         });
     }
 
@@ -76,26 +41,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
     const captionText = document.getElementById("caption");
-    // Query images in both gallery and slider
-    const galleryAndNewImages = document.querySelectorAll('.gallery-item img, .slide img');
+    // Query images in both gallery and new arrivals sliders
+    const imagesForModal = document.querySelectorAll('.gallery-slide img, .slide img');
     const closeModalBtn = document.querySelector(".close-modal");
 
-    if (modal && modalImg && captionText && galleryAndNewImages.length > 0 && closeModalBtn) {
-        galleryAndNewImages.forEach(img => {
+    if (modal && modalImg && captionText && imagesForModal.length > 0 && closeModalBtn) {
+        imagesForModal.forEach(img => {
             img.addEventListener('click', function() {
                 modal.style.display = "block";
                 document.body.style.overflow = 'hidden'; // Prevent background scrolling
                 modalImg.src = this.src;
 
-                // Try to get caption from sibling h3 or p tag within the parent container
+                // Try to get caption from parent slide's h3 tag
                 let itemCaption = this.alt; // Default to alt text
-                const parentItem = this.closest('.gallery-item') || this.closest('.slide'); // Check both containers
-                if (parentItem) {
-                    const h3 = parentItem.querySelector('h3');
+                const parentSlide = this.closest('.gallery-slide') || this.closest('.slide'); // Check both types
+                if (parentSlide) {
+                    const h3 = parentSlide.querySelector('h3');
                     if(h3) itemCaption = h3.textContent;
-                    // Optionally add description:
-                    // const p = parentItem.querySelector('p');
-                    // if(h3 && p) itemCaption += ` - ${p.textContent}`;
                 }
                 captionText.innerHTML = itemCaption;
             });
@@ -107,45 +69,53 @@ document.addEventListener('DOMContentLoaded', () => {
             document.body.style.overflow = ''; // Restore background scrolling
         }
 
-        // Close modal via the close button
+        // Event listeners for closing the modal
         closeModalBtn.onclick = closeModalAction;
-
-        // Close modal if clicked on the background overlay
-        modal.onclick = function(event) {
-            if (event.target === modal) {
-                closeModalAction();
-            }
-        }
-        // Close modal with Escape key
-        document.addEventListener('keydown', (event) => {
-            if (event.key === 'Escape' && modal.style.display === "block") {
-                closeModalAction();
-            }
-        });
+        modal.onclick = function(event) { if (event.target === modal) { closeModalAction(); } }
+        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.style.display === "block") { closeModalAction(); } });
     }
 
 
-    // --- Newly Arrived Slider ---
-    const slider = document.getElementById('newArrivalsSlider');
-    const prevBtn = document.getElementById('prevBtn');
-    const nextBtn = document.getElementById('nextBtn');
-    const sliderWrapper = document.querySelector('.slider-wrapper'); // Need the wrapper for width calculation
+    // --- Reusable Slider Function ---
+    function setupSlider(sliderId, prevBtnId, nextBtnId) {
+        // console.log(`Setting up slider: ${sliderId}`); // DEBUG: Check if function is called
+        const slider = document.getElementById(sliderId);
+        const prevBtn = document.getElementById(prevBtnId);
+        const nextBtn = document.getElementById(nextBtnId);
+        // Find the correct parent wrapper class
+        const sliderWrapper = slider ? slider.closest('.slider-wrapper, .gallery-slider-wrapper') : null;
 
-    if (slider && prevBtn && nextBtn && sliderWrapper) {
-        const slides = slider.querySelectorAll('.slide');
+        // DEBUG: Check if elements are found
+        // if (!slider) console.error(`Slider element not found: #${sliderId}`);
+        // if (!prevBtn) console.error(`Previous button not found: #${prevBtnId}`);
+        // if (!nextBtn) console.error(`Next button not found: #${nextBtnId}`);
+        // if (!sliderWrapper) console.error(`Slider wrapper not found for: #${sliderId}`);
+
+        if (!slider || !prevBtn || !nextBtn || !sliderWrapper) {
+            console.warn(`Slider setup aborted for: ${sliderId}. Essential elements missing.`);
+            return; // Exit if essential elements are missing
+        }
+
+        const slides = slider.querySelectorAll('.slide, .gallery-slide'); // Select both types of slides
+        // console.log(`Found ${slides.length} slides for ${sliderId}`); // DEBUG: Check slide count
         let currentIndex = 0;
         let slideWidth = 0;
-        let itemsVisible = 1; // Default to 1
+        let itemsVisible = 1;
 
-        function calculateSlideWidth() {
+        function calculateSlideMetrics() {
             if (slides.length > 0) {
-                 // Ensure styles are computed correctly
                  const style = window.getComputedStyle(slides[0]);
                  const marginRight = parseInt(style.marginRight, 10) || 0;
                  const marginLeft = parseInt(style.marginLeft, 10) || 0;
-                 // Use offsetWidth which includes padding and border
                  slideWidth = slides[0].offsetWidth + marginLeft + marginRight;
-                 itemsVisible = Math.max(1, Math.floor(sliderWrapper.offsetWidth / slideWidth));
+                 // Check for valid wrapper width and slide width
+                 if (sliderWrapper.offsetWidth > 0 && slideWidth > 0) {
+                    itemsVisible = Math.max(1, Math.floor(sliderWrapper.offsetWidth / slideWidth));
+                 } else {
+                    itemsVisible = 1; // Default if calculation fails
+                 }
+                 // DEBUG: Log calculated values
+                 // console.log(`${sliderId} - slideWidth: ${slideWidth}, wrapperWidth: ${sliderWrapper.offsetWidth}, itemsVisible: ${itemsVisible}`);
             } else {
                 slideWidth = 0;
                 itemsVisible = 1;
@@ -153,32 +123,47 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         function updateSliderPosition() {
-            calculateSlideWidth(); // Recalculate on update in case of resize or dynamic changes
-            if (slideWidth <= 0) return; // Avoid division by zero or incorrect calculations
+            calculateSlideMetrics(); // Recalculate on update
+            if (slideWidth <= 0 || slides.length === 0) return; // Exit if no slides or invalid width
 
-            const maxIndex = Math.max(0, slides.length - itemsVisible); // Ensure maxIndex is not negative
-            currentIndex = Math.max(0, Math.min(currentIndex, maxIndex)); // Clamp index within valid bounds [0, maxIndex]
+            // Ensure itemsVisible is at least 1, even if calculation seems off
+             itemsVisible = Math.max(1, itemsVisible);
+
+            const maxIndex = Math.max(0, slides.length - itemsVisible);
+            currentIndex = Math.max(0, Math.min(currentIndex, maxIndex));
 
             const offset = -currentIndex * slideWidth;
             slider.style.transform = `translateX(${offset}px)`;
+            // DEBUG: Log slider movement
+            // console.log(`${sliderId} - Moving to index: ${currentIndex}, offset: ${offset}px`);
 
-            // Disable/enable buttons at ends
             prevBtn.disabled = currentIndex === 0;
-            nextBtn.disabled = currentIndex >= maxIndex; // Use >= because index is 0-based
+            nextBtn.disabled = currentIndex >= maxIndex;
+            // DEBUG: Log button states
+            // console.log(`${sliderId} - Prev disabled: ${prevBtn.disabled}, Next disabled: ${nextBtn.disabled} (maxIndex: ${maxIndex})`);
         }
 
         nextBtn.addEventListener('click', () => {
+            // console.log(`${sliderId} - Next button clicked`); // DEBUG: Check click event
+            // Recalculate itemsVisible right before potentially moving
+            calculateSlideMetrics();
+            itemsVisible = Math.max(1, itemsVisible); // Ensure it's at least 1
             const maxIndex = Math.max(0, slides.length - itemsVisible);
             if (currentIndex < maxIndex) {
                 currentIndex++;
                 updateSliderPosition();
+            } else {
+                // console.log(`${sliderId} - Already at max index (${currentIndex})`); // DEBUG: Log if at end
             }
         });
 
         prevBtn.addEventListener('click', () => {
+            // console.log(`${sliderId} - Prev button clicked`); // DEBUG: Check click event
             if (currentIndex > 0) {
                 currentIndex--;
                 updateSliderPosition();
+            } else {
+                // console.log(`${sliderId} - Already at index 0`); // DEBUG: Log if at beginning
             }
         });
 
@@ -186,36 +171,38 @@ document.addEventListener('DOMContentLoaded', () => {
         function debounce(func, wait) {
             let timeout;
             return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
+                const later = () => { clearTimeout(timeout); func(...args); };
                 clearTimeout(timeout);
                 timeout = setTimeout(later, wait);
             };
         }
 
-        // Initial setup & recalculate on resize using debounce
-        const debouncedUpdate = debounce(updateSliderPosition, 150); // Debounce resize event
+        const debouncedUpdate = debounce(updateSliderPosition, 200); // Slightly longer debounce
         window.addEventListener('resize', debouncedUpdate);
 
-        // Add animation class to slides for observer (if not already added via gallery logic)
-        slides.forEach(slide => {
+        // Add animation class to slides
+         slides.forEach(slide => {
             if (!slide.classList.contains('animate-on-scroll')) {
-                 slide.classList.add('animate-on-scroll', 'fade-in');
-            }
-        });
+                slide.classList.add('animate-on-scroll', 'fade-in');
+             }
+         });
 
-        // Run initial calculation after slight delay to ensure layout is stable
-        setTimeout(updateSliderPosition, 50);
+        // Initial setup after a slightly longer delay for layout stability
+        setTimeout(updateSliderPosition, 200);
     }
+
+    // --- Initialize Sliders ---
+    // Make sure these IDs exactly match your HTML button/slider IDs!
+    setupSlider('gallerySlider', 'galleryPrevBtn', 'galleryNextBtn');
+    setupSlider('newArrivalsSlider', 'newArrivalsPrevBtn', 'newArrivalsNextBtn');
 
 
     // --- Intersection Observer for Scroll Animations ---
     let observer; // Define observer in a scope accessible by observeElements
 
     function observeElements() {
-        const animatedElements = document.querySelectorAll('.animate-on-scroll:not(.is-visible)'); // Select only elements not yet visible
+        // Target elements with class 'animate-on-scroll' that are NOT already visible
+        const animatedElements = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
 
         // Initialize observer only if it doesn't exist
         if (!observer) {
@@ -232,15 +219,16 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
 
-        // Observe currently non-visible elements that are displayed
+        // Observe each non-visible animated element if it's currently displayed
         animatedElements.forEach(el => {
-            if (window.getComputedStyle(el).display !== 'none') {
+            // Check if element is actually displayed before observing
+             if (window.getComputedStyle(el).display !== 'none') {
                 observer.observe(el);
-            }
+             }
         });
     }
 
-    // Call observeElements initially and potentially after content changes (like filtering)
+    // Initial call to observe elements on page load
     observeElements();
 
 
@@ -251,12 +239,13 @@ document.addEventListener('DOMContentLoaded', () => {
         const scrollThreshold = 300; // Pixels to scroll before showing button
 
         window.addEventListener('scroll', () => {
-            if (window.pageYOffset > scrollThreshold) { // More robust check
+            // Use window.scrollY for modern browsers
+            if (window.scrollY > scrollThreshold) {
                 backToTopButton.style.display = "block";
             } else {
                 backToTopButton.style.display = "none";
             }
-        });
+        }, { passive: true }); // Improve scroll performance
 
         backToTopButton.addEventListener("click", (e) => {
             e.preventDefault(); // Prevent default anchor behavior if it were an anchor
@@ -268,11 +257,73 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 
+    // --- Google Sheet Contact Form Submission ---
+    // !!! IMPORTANT: REPLACE THE PLACEHOLDER URL BELOW !!!
+    const scriptURL = 'https://script.google.com/macros/s/AKfycbx9dCFy_hZu2wFZu60NZgQQ_rT1ZcLXqQ8ahbHRtQc31AJ2khUMSm4vCawWBpvubjLEGA/exec'; // *** REPLACE THIS!!! ***
+    const form = document.forms['submit-to-google-sheet']; // Ensure your <form> has name="submit-to-google-sheet"
+    const formStatus = document.getElementById('form-status');
+    const submitButton = form ? form.querySelector('button[type="submit"]') : null;
+
+    if (form && submitButton) {
+        form.addEventListener('submit', e => {
+            e.preventDefault(); // Prevent default form submission
+
+            // Disable button and show 'sending' message
+            submitButton.disabled = true;
+            if(formStatus) formStatus.textContent = 'Sending...';
+            if(formStatus) formStatus.className = 'form-status'; // Reset class
+
+            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
+                .then(response => {
+                    // Check if response is ok (status 200-299)
+                    if (!response.ok) {
+                         // Try to get error details if server provided JSON error response
+                         return response.json().then(errData => {
+                            throw new Error(errData.error || `Server responded with status ${response.status}`);
+                         }).catch(() => {
+                            // Fallback if response wasn't JSON or other error parsing
+                            throw new Error(`Server responded with status ${response.status}`);
+                         });
+                    }
+                    return response.json(); // Parse JSON response from Apps Script
+                })
+                .then(data => {
+                    // Check the result field from the Apps Script response
+                    if (data.result === 'success') {
+                        console.log('Form Success:', data);
+                        if(formStatus) formStatus.textContent = 'Message sent successfully!';
+                        if(formStatus) formStatus.classList.add('success');
+                        form.reset(); // Clear the form fields
+                        submitButton.disabled = false; // Re-enable button
+                        // Optional: Hide success message after a few seconds
+                        setTimeout(() => { if(formStatus) { formStatus.textContent = ''; formStatus.className = 'form-status'; } }, 5000);
+                    } else {
+                        // Handle application-level errors returned from Apps Script
+                        throw new Error(data.error || 'Submission failed.');
+                    }
+                })
+                .catch(error => {
+                    // Handle fetch errors (network issues) or errors thrown above
+                    console.error('Form Error!', error.message);
+                    if(formStatus) formStatus.textContent = 'Error sending message. Please try again.';
+                    if(formStatus) formStatus.classList.add('error');
+                    submitButton.disabled = false; // Re-enable button
+                     // Optional: Hide error message after a few seconds
+                     setTimeout(() => { if(formStatus) { formStatus.textContent = ''; formStatus.className = 'form-status'; } }, 5000);
+                });
+        });
+    } else {
+        if (!form) console.error("Contact form not found (make sure <form> has name='submit-to-google-sheet').");
+        if (!submitButton) console.error("Submit button not found in the contact form.");
+    }
+    // --- End Google Sheet Contact Form Submission ---
+
+
     // --- Update Footer Year ---
     const currentYearSpan = document.getElementById('current-year');
     if (currentYearSpan) {
         try {
-            // Get the current year based on IST timezone (Asia/Kolkata)
+            // Get the current year based on Approximate IST (Asia/Kolkata)
             const now = new Date();
             // Options specify the timezone; use 'en-IN' or 'en-US' for locale preference if needed
             const options = { timeZone: 'Asia/Kolkata', year: 'numeric' };
