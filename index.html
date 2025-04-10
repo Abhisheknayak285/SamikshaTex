@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Discover premium sarees, new arrivals, and authentic collections at Samiksha Tex, your trusted saree shop in Tarsadi, Gujarat. Explore Silk, Cotton, Bandhani and more.">
     <title>Samiksha Tex - Premium Saree Shop, Tarsadi, Gujarat</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico"> <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+
+    <link rel="stylesheet" href="styles.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&family=Playfair+Display:ital,wght@0,400..900;1,400..900&display=swap" rel="stylesheet">
@@ -28,9 +30,9 @@
                     <li><a href="#contact">Contact</a></li>
                 </ul>
                 <div class="menu-toggle" id="mobile-menu">
-                        <span class="bar"></span>
-                        <span class="bar"></span>
-                        <span class="bar"></span>
+                     <span class="bar"></span>
+                     <span class="bar"></span>
+                     <span class="bar"></span>
                 </div>
             </div>
         </nav>
@@ -39,10 +41,10 @@
     <main>
         <section id="home" class="hero">
              <div class="hero-overlay"></div>
-             <div class="hero-content container animate-on-scroll fade-in">
-                 <p>Explore Tarsadi's finest collection of exquisite sarees at Samiksha Tex.</p>
-                 <a href="#gallery" class="cta-button">Explore Collection</a>
-             </div>
+            <div class="hero-content container animate-on-scroll fade-in">
+                <p>Explore Tarsadi's finest collection of exquisite sarees at Samiksha Tex.</p>
+                <a href="#gallery" class="cta-button">Explore Collection</a>
+            </div>
         </section>
 
         <section id="why-choose-us" class="why-choose-us-section section-padding">
@@ -74,18 +76,86 @@
         </section>
 
         <section id="gallery" class="saree-gallery section-padding">
-             <div class="container">
-                 <h2 class="section-title animate-on-scroll fade-in">Our Saree Gallery</h2>
-                 <p class="section-subtitle animate-on-scroll fade-in">Slide through a selection of beautiful sarees available at our boutique.</p>
+            <div class="container">
+                <h2 class="section-title animate-on-scroll fade-in">Our Saree Gallery</h2>
+                <p class="section-subtitle animate-on-scroll fade-in">Slide through a selection of beautiful sarees available at our boutique.</p>
 
-                 <div class="gallery-slider-wrapper animate-on-scroll fade-in">
-                     <div class="gallery-slider" id="gallerySlider">
-                         <p id="gallery-loading-message" style="text-align: center; padding: 20px; color: #555;">Loading gallery...</p>
-                     </div>
-                     <button class="slider-btn prev" id="galleryPrevBtn" aria-label="Previous Gallery Slide"><i class="fas fa-chevron-left"></i></button>
-                     <button class="slider-btn next" id="galleryNextBtn" aria-label="Next Gallery Slide"><i class="fas fa-chevron-right"></i></button>
-                 </div>
-             </div>
+                <div class="gallery-slider-wrapper animate-on-scroll fade-in">
+                    <div class="gallery-slider" id="gallerySlider">
+                        <div class="gallery-slide" data-category="silk">
+                            <img src="images/silk-saree1.jpg" alt="Elegant Banarasi Silk Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Banarasi Silk</h3>
+                                <p>Rich gold zari work, ideal for weddings.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="cotton">
+                            <img src="images/cotton-saree1.jpg" alt="Handloom Cotton Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Handloom Cotton</h3>
+                                <p>Breathable comfort, perfect for daily elegance.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="bandhani">
+                            <img src="images/bandhani-saree1.jpg" alt="Vibrant Gujarati Bandhani Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Gujarati Bandhani</h3>
+                                <p>Traditional tie-dye artistry.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="designer">
+                            <img src="images/designer-saree1.jpg" alt="Modern Designer Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Contemporary Design</h3>
+                                <p>Unique patterns for modern festivities.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="georgette">
+                            <img src="images/georgette-saree1.jpg" alt="Flowy Georgette Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Light Georgette</h3>
+                                <p>Elegant drape for evening occasions.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="silk">
+                            <img src="images/silk-saree2.jpg" alt="South Indian Kanjeevaram Silk Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Kanjeevaram Silk</h3>
+                                <p>Classic South Indian weave, known for lustre.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="cotton">
+                            <img src="images/cotton-saree2.jpg" alt="Printed Cotton Saree" loading="lazy">
+                            <div class="item-info">
+                                <h3>Printed Cotton</h3>
+                                <p>Vibrant prints on comfortable cotton.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="silk">
+                            <img src="images/gallery-placeholder-8.jpg" alt="Placeholder Silk Saree 8" loading="lazy">
+                            <div class="item-info">
+                                <h3>Mysore Silk</h3>
+                                <p>Elegant simplicity with rich texture.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="designer">
+                            <img src="images/gallery-placeholder-9.jpg" alt="Placeholder Designer Saree 9" loading="lazy">
+                            <div class="item-info">
+                                <h3>Sequin Work Saree</h3>
+                                <p>Sparkling design for parties.</p>
+                            </div>
+                        </div>
+                        <div class="gallery-slide" data-category="cotton">
+                            <img src="images/gallery-placeholder-10.jpg" alt="Placeholder Cotton Saree 10" loading="lazy">
+                            <div class="item-info">
+                                <h3>Jamdani Cotton</h3>
+                                <p>Fine muslin with intricate motifs.</p>
+                            </div>
+                        </div>
+                         </div>
+                    <button class="slider-btn prev" id="galleryPrevBtn" aria-label="Previous Gallery Slide"><i class="fas fa-chevron-left"></i></button>
+                    <button class="slider-btn next" id="galleryNextBtn" aria-label="Next Gallery Slide"><i class="fas fa-chevron-right"></i></button>
+                </div> </div>
         </section>
 
         <section id="new-arrivals" class="new-arrivals-section section-padding">
@@ -94,53 +164,53 @@
                 <p class="section-subtitle animate-on-scroll fade-in">Check out the latest additions to our exclusive collection.</p>
                 <div class="slider-wrapper animate-on-scroll fade-in">
                     <div class="new-arrivals-slider" id="newArrivalsSlider">
-                        <div class="slide" data-full-name="Pastel Silk Blend Elegance" data-full-info="Subtle elegance for daytime events, crafted from a smooth silk blend fabric.">
+                        <div class="slide">
                             <img src="images/new-arrival1.jpg" alt="New Arrival Saree 1 - Pastel Silk" loading="lazy">
                             <h3>Pastel Silk Blend</h3>
                             <p>Subtle elegance for daytime events.</p>
                         </div>
-                        <div class="slide" data-full-name="Embroidered Georgette Glamour" data-full-info="Intricate embroidery details adorn this georgette saree, perfect for special occasions and evening parties.">
+                        <div class="slide">
                             <img src="images/new-arrival2.jpg" alt="New Arrival Saree 2 - Embroidered Georgette" loading="lazy">
                             <h3>Embroidered Georgette</h3>
                             <p>Intricate details for special occasions.</p>
                         </div>
-                        <div class="slide" data-full-name="Digital Print Cotton Comfort" data-full-info="Modern and vibrant digital prints meet the comfort of pure cotton for everyday style.">
+                        <div class="slide">
                             <img src="images/new-arrival3.jpg" alt="New Arrival Saree 3 - Digital Print" loading="lazy">
                             <h3>Digital Print Cotton</h3>
                             <p>Modern prints meet comfort.</p>
                         </div>
-                        <div class="slide" data-full-name="Heavy Work Festive Bandhani" data-full-info="Traditional festive Bandhani saree featuring rich tie-dye patterns and heavy embellishments.">
+                        <div class="slide">
                             <img src="images/new-arrival4.jpg" alt="New Arrival Saree 4 - Heavy Bandhani" loading="lazy">
                             <h3>Heavy Work Bandhani</h3>
                             <p>Festive Bandhani with rich embellishments.</p>
                         </div>
-                        <div class="slide" data-full-name="Organza Floral Sheer Saree" data-full-info="A lightweight and trendy saree with beautiful floral designs printed on sheer organza.">
+                         <div class="slide">
                             <img src="images/new-arrival5.jpg" alt="New Arrival Saree 5 - Organza Floral" loading="lazy">
                             <h3>Organza Floral Saree</h3>
                             <p>Lightweight and trendy floral design.</p>
                         </div>
-                        <div class="slide" data-full-name="Chiffon Ombre Gradient Saree" data-full-info="Experience beautiful gradient shades transitioning smoothly in light and flowing chiffon fabric.">
-                            <img src="images/new-arrival-placeholder-6.jpg" alt="New Arrival Chiffon Ombre" loading="lazy">
+                         <div class="slide">
+                            <img src="images/new-arrival-placeholder-6.jpg" alt="New Arrival Placeholder 6" loading="lazy">
                             <h3>Chiffon Ombre</h3>
                             <p>Gradient shades in light chiffon.</p>
                         </div>
-                        <div class="slide" data-full-name="Sophisticated Linen Blend Saree" data-full-info="A comfortable and sophisticated saree made from a breathable linen blend, perfect for formal or casual wear.">
-                            <img src="images/new-arrival-placeholder-7.jpg" alt="New Arrival Linen Blend Saree" loading="lazy">
+                         <div class="slide">
+                            <img src="images/new-arrival-placeholder-7.jpg" alt="New Arrival Placeholder 7" loading="lazy">
                             <h3>Linen Blend Saree</h3>
                             <p>Comfortable and sophisticated linen.</p>
                         </div>
-                        <div class="slide" data-full-name="Mirror Work Georgette Shine" data-full-info="Classic georgette saree enhanced with traditional sparkling mirror work embellishments.">
-                            <img src="images/new-arrival-placeholder-8.jpg" alt="New Arrival Mirror Work Georgette" loading="lazy">
+                         <div class="slide">
+                            <img src="images/new-arrival-placeholder-8.jpg" alt="New Arrival Placeholder 8" loading="lazy">
                             <h3>Mirror Work Georgette</h3>
                             <p>Traditional mirror embellishments.</p>
                         </div>
-                        <div class="slide" data-full-name="Earthy Tussar Silk Print" data-full-info="Features unique prints in earthy tones on naturally textured Tussar silk fabric.">
-                            <img src="images/new-arrival-placeholder-9.jpg" alt="New Arrival Tussar Silk Print" loading="lazy">
+                         <div class="slide">
+                            <img src="images/new-arrival-placeholder-9.jpg" alt="New Arrival Placeholder 9" loading="lazy">
                             <h3>Tussar Silk Print</h3>
                             <p>Earthy tones with unique prints.</p>
                         </div>
-                        <div class="slide" data-full-name="Luxurious Velvet Border Saree" data-full-info="Adds a touch of luxury with rich, soft velvet accents along the border, suitable for grand occasions.">
-                            <img src="images/new-arrival-placeholder-10.jpg" alt="New Arrival Velvet Border Saree" loading="lazy">
+                         <div class="slide">
+                            <img src="images/new-arrival-placeholder-10.jpg" alt="New Arrival Placeholder 10" loading="lazy">
                             <h3>Velvet Border Saree</h3>
                             <p>Luxurious velvet accents.</p>
                         </div>
@@ -151,88 +221,88 @@
             </div>
         </section>
 
+
         <section id="contact" class="contact-section section-padding">
              <div class="container">
-                 <h2 class="section-title animate-on-scroll fade-in">Visit Us or Get in Touch</h2>
-                     <div class="contact-container">
+                <h2 class="section-title animate-on-scroll fade-in">Visit Us or Get in Touch</h2>
+                 <div class="contact-container">
 
-                         <div class="contact-details animate-on-scroll fade-in">
-                             <h3>Samiksha Tex</h3>
-                             <p>
-                                 <i class="fas fa-map-marker-alt contact-icon"></i>
-                                 <span class="contact-text">
-                                     <strong>Address:</strong><br>
-                                     [Your Shop Number/Building Name],<br>
-                                     [Street Name / Landmark],<br>
-                                     Tarsadi, [Your Postal Code e.g., 394350],<br>
-                                     Gujarat, India
-                                 </span>
-                             </p>
-                             <p>
-                                <i class="fas fa-phone-alt contact-icon"></i>
-                                <span class="contact-text">
-                                    <strong>Phone:</strong>
-                                    <a href="tel:+91XXXXXXXXXX">+91-XXXXX XXXXX</a>
-                                </span>
-                             </p>
-                             <p>
-                                <i class="fas fa-envelope contact-icon"></i>
-                                <span class="contact-text">
-                                    <strong>Email:</strong>
-                                     <a href="mailto:info@samikshatex.com">info@samikshatex.com</a>
-                                </span>
-                             </p>
-                             <p>
-                                 <i class="far fa-clock contact-icon"></i>
-                                 <span class="contact-text">
-                                     <strong>Opening Hours:</strong><br>
-                                     Mon - Sat: 10:00 AM - 8:00 PM<br>
-                                     Sunday: Closed
-                                 </span>
-                             </p>
-                         </div>
+                    <div class="contact-details animate-on-scroll fade-in">
+                        <h3>Samiksha Tex</h3>
+                        <p>
+                            <i class="fas fa-map-marker-alt contact-icon"></i>
+                            <span class="contact-text">
+                                <strong>Address:</strong><br>
+                                [Your Shop Number/Building Name],<br>
+                                [Street Name / Landmark],<br>
+                                Tarsadi, [Your Postal Code],<br>
+                                Gujarat, India
+                            </span>
+                        </p>
+                        <p>
+                           <i class="fas fa-phone-alt contact-icon"></i>
+                           <span class="contact-text">
+                                <strong>Phone:</strong>
+                                <a href="tel:+91XXXXXXXXXX">+91-XXXXX XXXXX</a>
+                           </span>
+                        </p>
+                        <p>
+                           <i class="fas fa-envelope contact-icon"></i>
+                           <span class="contact-text">
+                                <strong>Email:</strong>
+                                <a href="mailto:info@samikshatex.com">info@samikshatex.com</a>
+                           </span>
+                        </p>
+                        <p>
+                            <i class="far fa-clock contact-icon"></i>
+                            <span class="contact-text">
+                                <strong>Opening Hours:</strong><br>
+                                Mon - Sat: 10:00 AM - 8:00 PM<br>
+                                Sunday: Closed
+                            </span>
+                        </p>
+                    </div>
 
-                         <div class="contact-map animate-on-scroll fade-in" style="animation-delay: 0.1s;">
-                              <iframe
-                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1730.153717361074!2d72.84077815944555!3d21.192498511519126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04e505bde8f39%3A0xfb955d6532c131a7!2sSAMIKSHA%20TEX!5e0!3m2!1sen!2sin!4v1744170043321!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"
-                                 width="100%"
-                                 height="100%" /* Adjusted via CSS aspect-ratio */
-                                 style="border:0;"
-                                 allowfullscreen=""
-                                 loading="lazy"
-                                 referrerpolicy="no-referrer-when-downgrade"
-                                 title="Samiksha Tex Location Map">
-                              </iframe>
-                             </div>
-
-                         <div class="contact-form-container animate-on-scroll fade-in">
-                             <h3>Send Us a Message</h3>
-                             <form id="contact-form" class="contact-form" name="submit-to-google-sheet">
-                                 <div class="form-group">
-                                     <label for="name">Name:</label>
-                                     <input type="text" id="name" name="Name" required placeholder="Your Full Name">
-                                 </div>
-                                 <div class="form-group">
-                                     <label for="mobile">Mobile No.:</label>
-                                     <input type="tel" id="mobile" name="Mobile" required placeholder="Your Phone Number">
-                                 </div>
-                                 <div class="form-group">
-                                     <label for="place">Place:</label>
-                                     <input type="text" id="place" name="Place" required placeholder="Your City / Area">
-                                 </div>
-                                 <div class="form-group">
-                                     <label for="message">Message:</label>
-                                     <textarea id="message" name="Message" rows="5" required placeholder="Your Inquiry or Message"></textarea>
-                                 </div>
-                                 <div class="form-group form-submit-group">
-                                      <button type="submit" class="submit-button">Send Message</button>
-                                      <span id="form-status" class="form-status"></span> </div>
-                             </form>
-                         </div>
-
+                    <div class="contact-map animate-on-scroll fade-in" style="animation-delay: 0.1s;">
+                         <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1730.153717361074!2d72.84077815944555!3d21.192498511519126!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be04e505bde8f39%3A0xfb955d6532c131a7!2sSAMIKSHA%20TEX!5e0!3m2!1sen!2sin!4v1744170043321!5m2!1sen!2sin" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" /* *** IMPORTANT: Replace placeholder *** */
+                            width="100%"
+                            height="100%" /* Adjusted via CSS aspect-ratio */
+                            style="border:0;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade"
+                            title="Samiksha Tex Location Map">
+                        </iframe>
                      </div>
-             </div>
-        </section>
+
+                    <div class="contact-form-container animate-on-scroll fade-in">
+                        <h3>Send Us a Message</h3>
+                        <form id="contact-form" class="contact-form" name="submit-to-google-sheet">
+                            <div class="form-group">
+                                <label for="name">Name:</label>
+                                <input type="text" id="name" name="Name" required placeholder="Your Full Name">
+                            </div>
+                            <div class="form-group">
+                                <label for="mobile">Mobile No.:</label>
+                                <input type="tel" id="mobile" name="Mobile" required placeholder="Your Phone Number">
+                            </div>
+                            <div class="form-group">
+                                <label for="place">Place:</label>
+                                <input type="text" id="place" name="Place" required placeholder="Your City / Area">
+                            </div>
+                            <div class="form-group">
+                                <label for="message">Message:</label>
+                                <textarea id="message" name="Message" rows="5" required placeholder="Your Inquiry or Message"></textarea>
+                            </div>
+                            <div class="form-group form-submit-group">
+                                 <button type="submit" class="submit-button">Send Message</button>
+                                 <span id="form-status" class="form-status"></span>
+                            </div>
+                        </form>
+                    </div>
+
+                 </div> </div> </section>
 
     </main>
 
@@ -240,9 +310,9 @@
         <div class="container">
             <div class="footer-content">
                  <div class="footer-social">
-                     <a href="#" aria-label="Facebook" title="Facebook" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
-                     <a href="#" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
-                     <a href="#" aria-label="Whatsapp" title="WhatsApp" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
+                    <a href="YOUR_FACEBOOK_LINK" aria-label="Facebook" title="Facebook" target="_blank" rel="noopener noreferrer"><i class="fab fa-facebook-f"></i></a>
+                    <a href="YOUR_INSTAGRAM_LINK" aria-label="Instagram" title="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
+                    <a href="YOUR_WHATSAPP_LINK" aria-label="Whatsapp" title="WhatsApp" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
                  </div>
                 <p>© <span id="current-year">2025</span> Samiksha Tex. Elegance Woven in Tradition.</p>
                 <p>Tarsadi, Gujarat, India</p>
