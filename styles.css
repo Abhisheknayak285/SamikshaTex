@@ -75,7 +75,6 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.3;
     font-weight: 700;
 }
-/* H1 removed from Hero, styling kept for potential future use */
 h1 { font-size: clamp(2.2rem, 7vw, 2.8rem); }
 h2 { font-size: clamp(1.8rem, 6vw, 2.4rem); }
 h3 { font-size: clamp(1.2rem, 5vw, 1.5rem); color: var(--tertiary-color); }
@@ -138,7 +137,7 @@ a:hover { color: var(--primary-color); }
 .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 /* Hero Section */
-.hero { background: url('https://assets.onecompiler.app/43d4xt63k/43e9u7hhq/WhatsApp%20Image%202025-04-09%20at%202.03.56%20PM.jpeg') no-repeat center center/cover; display: flex; align-items: center; justify-content: center; position: relative; text-align: center; color: #fff; padding: 2rem 0; }
+.hero { background: url('https://assets.onecompiler.app/43d4xt63k/43e9u7hhq/WhatsApp%20Image%202025-04-09%20at%202.03.56%20PM.jpeg') no-repeat center center/cover; display: flex; align-items: center; justify-content: center; position: relative; text-align: center; color: #fff; padding: 2rem 0; min-height: 60vh; /* Ensure decent height on mobile */ }
 .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.75)); }
 .hero-content { position: relative; z-index: 2; width: 90%; }
 .hero p { color: #f0f0f0; font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 300; }
@@ -154,40 +153,105 @@ a:hover { color: var(--primary-color); }
 .feature-item h3 { color: var(--primary-color); margin-bottom: 0.6rem; font-size: 1.3rem; }
 .feature-item p { font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 0; }
 
-/* Saree Gallery Section (Slider Styles) */
+/* Saree Gallery & New Arrivals Section (Slider Styles) */
 .saree-gallery { background-color: var(--light-gold-bg); }
-.gallery-slider-wrapper { position: relative; max-width: 1100px; margin: 2rem auto 0; overflow: hidden; padding: 0 5px; }
-.gallery-slider { display: flex; transition: transform 0.5s ease-in-out; }
-.gallery-slide { min-width: 85%; margin: 0 10px; flex-shrink: 0; background-color: var(--background-section); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-light); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; }
-.gallery-slide:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
-.gallery-slide img { width: 100%; height: 300px; object-fit: cover; cursor: pointer; transition: transform 0.4s ease, filter 0.4s ease; }
-.gallery-slide:hover img { transform: scale(1.05); filter: brightness(1.03); }
+.new-arrivals-section { background-color: var(--background-section); }
+
+/* --- Slider Styles --- */
+
+/* Slider Wrapper - No padding on mobile/tablet */
+.gallery-slider-wrapper,
+.slider-wrapper {
+    position: relative;
+    max-width: 1100px;
+    margin: 1.5rem auto 0;
+    overflow: hidden;
+    padding: 0; /* NO horizontal padding */
+    box-sizing: border-box;
+}
+
+/* Inner Slider Container */
+.gallery-slider,
+.new-arrivals-slider {
+    display: flex;
+    transition: transform 0.5s ease-in-out;
+    padding: 0;
+}
+
+/* Slides - 100% width and NO horizontal margin on mobile/tablet */
+.gallery-slide,
+.slide {
+    min-width: 100%;
+    width: 100%;
+    margin-left: 0;  /* NO horizontal margin */
+    margin-right: 0; /* NO horizontal margin */
+    flex-shrink: 0;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: var(--shadow-light);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box; /* Ensure padding doesn't add to width */
+}
+
+.gallery-slide { background-color: var(--background-section); }
+.slide { background-color: var(--background-light); }
+
+/* Image Styling - SQUARE SHAPE */
+.gallery-slide img,
+.slide img {
+    width: 100%;
+    display: block;
+    aspect-ratio: 1 / 1; /* Enforce square shape */
+    object-fit: cover; /* Cover the area without distortion */
+    cursor: pointer; /* For modal */
+    transition: transform 0.4s ease, filter 0.4s ease;
+}
+.gallery-slide:hover img { transform: scale(1.05); filter: brightness(1.03); } /* Optional hover on image */
+
+/* Info/Text styling */
 .gallery-slide .item-info { padding: 1rem 1.2rem; text-align: center; flex-grow: 1; }
 .gallery-slide .item-info h3 { margin-bottom: 0.4rem; font-size: 1.2rem; color: var(--primary-color); }
 .gallery-slide .item-info p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0; }
 
-/* New Arrivals Section (Slider Styles) */
-.new-arrivals-section { background-color: var(--background-section); }
-.slider-wrapper { position: relative; max-width: 1100px; margin: 1.5rem auto 0; overflow: hidden; padding: 0 5px; }
-.new-arrivals-slider { display: flex; transition: transform 0.5s ease-in-out; }
-.slide { min-width: 85%; margin: 0 10px; flex-shrink: 0; background-color: var(--background-light); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); transition: transform 0.3s ease; }
-.slide:hover { transform: translateY(-5px); box-shadow: var(--shadow-medium); }
-.slide img { width: 100%; height: 280px; object-fit: cover; }
 .slide h3, .slide p { padding: 0.5rem 1rem; text-align: center; }
 .slide h3 { font-size: 1.1rem; color: var(--primary-color); margin-top: 0.5rem; margin-bottom: 0.3rem; }
 .slide p { font-size: 0.85rem; color: var(--text-light); padding-bottom: 1rem; margin-bottom: 0; }
 
 /* Generic Slider Button Styles */
-.slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; color: var(--primary-color); font-size: 1.3rem; padding: 0.6rem; border-radius: 50%; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease; z-index: 10; line-height: 1; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); opacity: 0.85; }
+.slider-btn {
+    position: absolute;
+    top: 40%; /* Adjust vertical position - may need tweaking based on actual image size */
+    transform: translateY(-50%);
+    background-color: rgba(255, 255, 255, 0.7);
+    border: none;
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    padding: 0.6rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
+    z-index: 10;
+    line-height: 1;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25);
+    opacity: 0.85;
+}
 .slider-btn:hover { background-color: var(--primary-color); color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); opacity: 1; }
-.slider-btn.prev { left: 10px; }
-.slider-btn.next { right: 10px; }
+.slider-btn.prev { left: 10px; } /* Position for mobile/tablet */
+.slider-btn.next { right: 10px; } /* Position for mobile/tablet */
 .slider-btn:disabled { opacity: 0.3; cursor: default; background-color: rgba(200, 200, 200, 0.5); box-shadow: none; }
+/* --- End Slider Styles --- */
+
 
 /* --- Contact Section CSS --- */
 .contact-section { background-color: var(--background-light); }
 .contact-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
-/* Columns removed from base styles */
 .contact-details { padding-right: 0; }
 .contact-details h3 { color: var(--primary-color); font-size: clamp(1.5rem, 5vw, 1.8rem); margin-bottom: 1.2rem; }
 .contact-details p { display: flex; align-items: flex-start; margin-bottom: 1.2rem; font-size: 1rem; line-height: 1.6; color: var(--text-light); }
@@ -220,7 +284,6 @@ a:hover { color: var(--primary-color); }
 .form-status.success { color: #155724; }
 .form-status.error { color: #721c24; }
 /* --- End Contact Form Styles --- */
-
 /* --- End Contact Section CSS --- */
 
 
@@ -261,13 +324,11 @@ a:hover { color: var(--primary-color); }
     .section-title::after { width: 70px; }
     .section-subtitle { font-size: 1.05rem; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
-    .gallery-slide { min-width: calc(50% - 20px); }
-    .gallery-slide img { height: 320px; }
-    .slide { min-width: calc(50% - 20px); }
-    .slide img { height: 300px; }
     .contact-map iframe { height: 350px; min-height: 300px; }
     .hero { min-height: 70vh; }
     .hero p { font-size: 1.2rem; }
+
+    /* Slider Adjustments for Tablet - Inherits 1 slide view */
 }
 
 
@@ -287,71 +348,29 @@ a:hover { color: var(--primary-color); }
      .logo-image { height: 40px; }
      .logo-text { font-size: 1.8rem; }
      .hero { min-height: 75vh; }
-     .gallery-slide { min-width: calc(33.333% - 20px); }
-     .gallery-slide img { height: 340px; }
-     .slide { min-width: calc(33.333% - 20px); }
-     .slide img { height: 310px; }
 
-     /* === New Contact Section Layout using Grid Areas === */
+     /* Slider Adjustments - Inherits 1 slide view */
+
+     /* === Contact Section Layout === */
      .contact-container {
          display: grid;
-         grid-template-columns: 1fr 1fr; /* Define 2 equal columns */
-         grid-template-areas:
-             "details map"    /* Row 1: Details left, Map right */
-             "form    form";  /* Row 2: Form spans both columns */
-         gap: 2.5rem; /* Adjust gap between grid items */
-         align-items: flex-start; /* Align items to the top of their area */
+         grid-template-columns: 1fr 1fr;
+         grid-template-areas: "details map" "form form";
+         gap: 2.5rem;
+         align-items: flex-start;
      }
-
-     /* Assign elements to grid areas */
-     .contact-details {
-         grid-area: details;
-         margin-bottom: 0; /* Remove bottom margin as form is below */
-     }
-
-     .contact-map {
-         grid-area: map;
-         width: 100%;         /* Take full width of its grid area */
-         aspect-ratio: 1 / 1; /* Keep it square */
-         border-radius: 8px;
-         overflow: hidden;
-         margin-top: 0; /* Reset mobile margin */
-     }
-     .contact-map iframe {
-        display: block;
-        width: 100%;
-        height: 100%; /* Fill the square container */
-        min-height: initial; /* Override min-height */
-        aspect-ratio: initial; /* Remove aspect ratio from iframe itself */
-        border: none;
-        border-radius: 0;
-     }
-
-     .contact-form-container {
-         grid-area: form;
-         margin-top: 1rem;    /* Add some space above the form */
-         aspect-ratio: initial; /* Remove forced square shape from form */
-         overflow: visible;   /* Remove scrollbar from form container */
-         width: 100%; /* Ensure it spans the grid area width */
-         max-width: 800px; /* Optional: Limit max width */
-         margin-left: auto; /* Center if max-width is applied */
-         margin-right: auto;
-     }
-     .contact-form {
-        /* Reset flex properties from previous attempt if any */
-        flex-grow: initial;
-        display: block; /* Back to default block layout */
-        min-height: initial;
-     }
-      .contact-form .form-group:last-of-type {
-         margin-top: 1.5rem; /* Ensure submit button has standard margin */
-     }
-     /* === End New Contact Section Layout === */
+     .contact-details { grid-area: details; margin-bottom: 0; }
+     .contact-map { grid-area: map; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; margin-top: 0; }
+     .contact-map iframe { display: block; width: 100%; height: 100%; min-height: initial; aspect-ratio: initial; border: none; border-radius: 0; }
+     .contact-form-container { grid-area: form; margin-top: 1rem; aspect-ratio: initial; overflow: visible; width: 100%; max-width: 800px; margin-left: auto; margin-right: auto; }
+     .contact-form { flex-grow: initial; display: block; min-height: initial; }
+     .contact-form .form-group:last-of-type { margin-top: 1.5rem; }
+     /* === End Contact Section Layout === */
 }
 
 
 /* ----------------------------- */
-/* --- Larger Desktop Styles --- */
+/* --- Desktop Styles (3 Slides) --- */
 /* ----------------------------- */
 @media (min-width: 992px) {
     .container { width: 85%; }
@@ -370,25 +389,47 @@ a:hover { color: var(--primary-color); }
     .features-grid { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
     .feature-item { padding: 2rem 1.5rem; }
     .feature-icon { font-size: 2.8rem; }
-    .gallery-slide { min-width: calc(25% - 20px); }
-    .gallery-slide img { height: 350px; }
-    .slide { min-width: calc(33.333% - 20px); }
-    .slide img { height: 320px; }
-    .slider-btn { padding: 0.8rem; width: 45px; height: 45px; font-size: 1.5rem; }
-    .slider-wrapper .slider-btn.prev,
-    .gallery-slider-wrapper .slider-btn.prev { left: 15px; }
-    .slider-wrapper .slider-btn.next,
-    .gallery-slider-wrapper .slider-btn.next { right: 15px; }
 
-    /* Contact Section */
-    .contact-map { max-width: 550px; margin-left: 0; margin-right: 0; /* Align map within its grid cell */ }
+     /* Slider Adjustments for 3 Slides */
+    .gallery-slider-wrapper,
+    .slider-wrapper {
+         /* Add padding for peeking effect */
+         padding: 0 5%; /* Adjust this percentage */
+    }
+    .gallery-slide,
+    .slide {
+        /* Width for 3 slides: (100% - 2*Padding) / 3 */
+        /* Example: (100 - 2*5) / 3 = 90 / 3 = 30% */
+        min-width: 30%; /* Adjust this percentage */
+        width: 30%;     /* Adjust this percentage */
+        margin: 0 10px; /* Re-introduce margin for spacing */
+    }
+
+    /* Adjust slider button size/position */
+    .slider-btn { padding: 0.8rem; width: 45px; height: 45px; font-size: 1.5rem; }
+    .slider-btn.prev { left: 1%; /* Position relative to edge */ }
+    .slider-btn.next { right: 1%; /* Position relative to edge */ }
+
+    /* Contact Section adjustments */
+    .contact-map { max-width: 550px; margin-left: 0; margin-right: 0; }
     .contact-form-container { padding: 2rem; max-width: 900px; }
 
+    /* Footer adjustments */
     .site-footer-bottom { padding: 2.5rem 0; }
     .footer-social a { font-size: 1.4rem; margin: 0 0.8rem; }
 }
 
+/* Larger Desktop - Keep 3 slide layout */
 @media (min-width: 1200px) {
-    .gallery-slide { min-width: calc(25% - 20px); }
-    .slide { min-width: calc(33.333% - 20px); }
+    .gallery-slider-wrapper,
+    .slider-wrapper {
+         padding: 0 4%; /* Fine-tune padding */
+    }
+    .gallery-slide,
+    .slide {
+        /* (100 - 2*4) / 3 = 92 / 3 = ~30.6% */
+        min-width: 30.6%;
+        width: 30.6%;
+        margin: 0 10px; /* Ensure margin is present */
+    }
 }
