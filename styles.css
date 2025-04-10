@@ -136,7 +136,7 @@ a:hover { color: var(--primary-color); }
 .menu-toggle.is-active .bar:nth-child(3) { transform: translateY(-8px) rotate(-45deg); }
 
 /* Hero Section */
-.hero { background: url('https://assets.onecompiler.app/43d4xt63k/43e9u7hhq/WhatsApp%20Image%202025-04-09%20at%202.03.56%20PM.jpeg') no-repeat center center/cover; display: flex; align-items: center; justify-content: center; position: relative; text-align: center; color: #fff; padding: 2rem 0; min-height: 60vh; }
+.hero { background: url('https://assets.onecompiler.app/43d4xt63k/43e9u7hhq/WhatsApp%20Image%202025-04-09%20at%202.03.56%20PM.jpeg') no-repeat center center/cover; display: flex; align-items: center; justify-content: center; position: relative; text-align: center; color: #fff; padding: 2rem 0; }
 .hero-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.75)); }
 .hero-content { position: relative; z-index: 2; width: 90%; }
 .hero p { color: #f0f0f0; font-size: 1.1rem; margin-bottom: 1.5rem; font-weight: 300; }
@@ -433,7 +433,16 @@ a:hover { color: var(--primary-color); }
      .contact-details { grid-area: details; margin-bottom: 0; }
      .contact-map { grid-area: map; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; margin-top: 0; }
      .contact-map iframe { width: 100%; height: 100%; min-height: initial; aspect-ratio: initial; border: none; border-radius: 0; }
-     .contact-form-container { grid-area: form; margin-top: 1rem; max-width: 800px; margin-left: auto; margin-right: auto; }
+     .contact-form-container {
+         grid-area: form;
+         margin-top: 1rem;    /* Add some space above the form */
+         aspect-ratio: initial; /* Remove forced square shape from form */
+         overflow: visible;   /* Remove scrollbar from form container */
+         width: 100%; /* Ensure it spans the grid area width */
+         max-width: 800px; /* Optional: Limit max width */
+         margin-left: auto; /* Center if max-width is applied */
+         margin-right: auto;
+     }
 }
 
 @media (min-width: 992px) {
@@ -490,175 +499,3 @@ a:hover { color: var(--primary-color); }
 /* --- Very Small Screen Overrides --- */
 /* (Applies ONLY up to 599px wide) */
 /* -------------------------------- */
-@media (max-width: 599px) {
-
-    :root {
-        /* Base font size is already 15px, typically fine. */
-        /* You could slightly decrease it if needed: font-size: 14.5px; */
-    }
-
-    .container {
-        width: 92%; /* Slightly more width usage if needed */
-    }
-
-    .section-padding {
-        padding: 3rem 0; /* Slightly reduce vertical padding */
-    }
-
-    /* Headings: Adjust minimum clamp size if base feels too big */
-    h1 { font-size: clamp(2rem, 7vw, 2.8rem); } /* Lower minimum size */
-    h2 { font-size: clamp(1.7rem, 6vw, 2.4rem); } /* Lower minimum size */
-    h3 { font-size: clamp(1.1rem, 5vw, 1.5rem); }
-
-    .section-subtitle {
-        font-size: 0.95rem; /* Slightly smaller subtitle */
-        max-width: 95%;
-    }
-
-    /* Navbar Adjustments */
-    .navbar .container {
-        padding: 0 15px; /* Reduce padding slightly */
-    }
-    .logo-image {
-        height: 32px; /* Slightly smaller logo */
-    }
-    .logo-text {
-        font-size: 1.5rem; /* Slightly smaller logo text */
-    }
-    .nav-links a {
-        padding: 0.9rem 1.2rem; /* Adjust mobile menu link padding */
-        font-size: 0.95rem;
-    }
-
-    /* Hero Section Adjustments */
-    .hero {
-        min-height: 55vh; /* Adjust height if needed */
-        padding: 1.5rem 0;
-    }
-    .hero p {
-        font-size: 1rem; /* Slightly smaller hero text */
-        margin-bottom: 1.2rem;
-    }
-    .cta-button {
-        padding: 10px 25px; /* Smaller CTA button */
-        font-size: 0.9rem;
-    }
-
-    /* Why Choose Us / Features Adjustments */
-    .feature-item {
-        padding: 1.5rem 1rem; /* Less padding inside feature items */
-    }
-    .feature-icon {
-        font-size: 2.2rem; /* Slightly smaller icon */
-    }
-    .feature-item h3 {
-        font-size: 1.2rem;
-    }
-    .feature-item p {
-        font-size: 0.9rem;
-    }
-
-    /* Slider Adjustments for very small screens */
-    .gallery-slider-wrapper, .slider-wrapper {
-        /* Adjust margin if needed */
-        margin: 1.5rem auto 0;
-    }
-    .gallery-slide, .slide {
-        min-width: 80%; /* Show more of a single slide, less peeking */
-        margin: 0 8px; /* Reduce margin between slides slightly */
-        /* Adjust non-active scale/opacity if desired */
-        /* opacity: 0.5; */
-        /* transform: scale(0.85); */
-    }
-    .gallery-slide img, .slide img {
-        height: 260px; /* Reduce image height */
-    }
-    .gallery-slide .item-info, .slide .item-info {
-        padding: 0.8rem 1rem; /* Less padding in info area */
-        min-height: 70px; /* Adjust min-height */
-    }
-     .gallery-slide .item-info h3, .slide h3 {
-        font-size: 1.1rem; /* Smaller heading in slide */
-    }
-     .gallery-slide .item-info p, .slide p {
-        font-size: 0.85rem; /* Smaller text in slide */
-        -webkit-line-clamp: 2; /* Ensure line clamp is still active */
-    }
-    /* Slider Buttons: Bring them further inside the viewport */
-    .slider-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.3rem;
-        padding: 0.6rem;
-    }
-    .slider-btn.prev {
-        left: 5px; /* Position inside the container bounds */
-    }
-    .slider-btn.next {
-        right: 5px; /* Position inside the container bounds */
-    }
-
-    /* Contact Section Adjustments */
-    .contact-details p {
-        font-size: 0.95rem; /* Slightly smaller contact text */
-        margin-bottom: 1rem;
-    }
-    .contact-icon {
-        margin-right: 10px;
-        font-size: 1rem;
-    }
-    .contact-form-container {
-        padding: 1.2rem; /* Less padding in form container */
-    }
-    .contact-form-container h3 {
-        font-size: 1.4rem; /* Smaller form title */
-    }
-    .contact-form input[type="text"],
-    .contact-form input[type="tel"],
-    .contact-form input[type="email"],
-    .contact-form textarea {
-        padding: 9px 10px; /* Slightly smaller input padding */
-        font-size: 0.95rem;
-    }
-    .submit-button {
-        padding: 10px 30px; /* Adjust submit button padding */
-        font-size: 0.95rem;
-    }
-
-    /* Footer Adjustments */
-    .site-footer-bottom {
-        padding: 1.5rem 0 1rem;
-    }
-    .footer-content p {
-        font-size: 0.85rem; /* Smaller footer text */
-    }
-    .footer-social a {
-        font-size: 1.2rem; /* Smaller social icons */
-        margin: 0 0.6rem;
-    }
-
-    /* Back to Top Button */
-    #back-to-top-btn {
-        width: 40px;
-        height: 40px;
-        font-size: 1.2rem;
-        bottom: 15px;
-        right: 15px;
-    }
-
-    /* Modal Adjustments (if needed) */
-    .modal-content {
-        width: 95%; /* Use slightly more width */
-    }
-    #caption h3 {
-        font-size: 1.2rem;
-    }
-    #caption p {
-        font-size: 0.9rem;
-    }
-    .close-modal {
-        font-size: 30px;
-        top: 10px;
-        right: 20px;
-    }
-}
