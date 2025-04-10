@@ -64,6 +64,7 @@ body {
     align-items: center;
 }
 
+
 img { max-width: 100%; height: auto; display: block; }
 
 /* Headings & Text (Mobile First Sizes) */
@@ -74,6 +75,7 @@ h1, h2, h3, h4, h5, h6 {
     line-height: 1.3;
     font-weight: 700;
 }
+/* H1 removed from Hero, styling kept for potential future use */
 h1 { font-size: clamp(2.2rem, 7vw, 2.8rem); }
 h2 { font-size: clamp(1.8rem, 6vw, 2.4rem); }
 h3 { font-size: clamp(1.2rem, 5vw, 1.5rem); color: var(--tertiary-color); }
@@ -152,169 +154,40 @@ a:hover { color: var(--primary-color); }
 .feature-item h3 { color: var(--primary-color); margin-bottom: 0.6rem; font-size: 1.3rem; }
 .feature-item p { font-size: 0.95rem; color: var(--text-light); line-height: 1.6; margin-bottom: 0; }
 
-/* Saree Gallery & New Arrivals Sliders Common Wrapper Styles */
-.gallery-slider-wrapper, .slider-wrapper {
-    position: relative;
-    max-width: 1100px;
-    margin: 2rem auto 0;
-    /* Changed from overflow: hidden to visible for center mode peeking */
-    overflow: visible;
-    /* Optional padding to prevent centered slide touching edges */
-    /* padding: 0 5%; */
-}
-/* Slider Track Styles */
-.gallery-slider, .new-arrivals-slider {
-    display: flex;
-    /* Transition set via JS */
-    will-change: transform;
-    /* Center alignment items relative to the track - may not be needed with transform centering */
-    /* align-items: center; */
-}
-
-/* === SLIDE STYLES (Center Mode) === */
-
-/* Individual Slide Styles (Gallery & New Arrivals) */
-.gallery-slide, .slide {
-    /* Base responsive width */
-    min-width: 70%; /* Adjust min-width for center mode (e.g., show 1 full + parts of others) */
-    margin: 0 10px;
-    flex-shrink: 0;
-    background-color: var(--background-section);
-    border-radius: 10px;
-    box-shadow: var(--shadow-light);
-    overflow: hidden;
-    display: flex;
-    flex-direction: column; /* Back to column layout - easier to manage */
-
-    /* Center Mode Transition & Base Style (Non-Active) */
-    transition: transform 0.4s ease, opacity 0.4s ease, box-shadow 0.4s ease;
-    opacity: 0.6;
-    transform: scale(0.9);
-    cursor: pointer; /* Indicate slides can be interacted with */
-}
-.gallery-slide.clone, .slide.clone {
-    /* Optional: slightly different style for clones if needed for debugging */
-}
-
-/* Active (Centered) Slide Style */
-.gallery-slide.active, .slide.active {
-    opacity: 1;
-    transform: scale(1); /* Or scale(1.05) to make it slightly larger */
-    box-shadow: var(--shadow-medium);
-    z-index: 2; /* Bring active slide slightly forward */
-}
-
-/* Image within the slide */
-.gallery-slide img, .slide img {
-    width: 100%;
-    display: block;
-    height: 300px; /* Maintain fixed image height */
-    object-fit: cover;
-    /* Removed aspect-ratio to use fixed height */
-    /* Removed pointer cursor here, apply to whole slide */
-    transition: transform 0.4s ease, filter 0.4s ease; /* Keep image hover if needed */
-}
-/* Optional hover effect specific to image within the active slide */
-/* .gallery-slide.active:hover img, .slide.active:hover img {
-    transform: scale(1.05);
-    filter: brightness(1.03);
-} */
-
-/* Text Info Area within the slide */
-.gallery-slide .item-info,
-.slide .item-info {
-    padding: 1rem 1.2rem;
-    text-align: center; /* Revert to center align for column layout */
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    overflow: hidden;
-    min-height: 80px;
-    flex-shrink: 0;
-    /* Removed fixed width */
-}
-
-/* Heading inside info area */
-.gallery-slide .item-info h3,
-.slide h3 {
-    margin-bottom: 0.4rem;
-    font-size: 1.2rem;
-    color: var(--primary-color);
-    white-space: normal; /* Allow wrapping again */
-    overflow-wrap: break-word;
-    /* Remove text-overflow ellipsis (handled by JS truncation if needed) */
-}
-
-/* Paragraph inside info area */
-.gallery-slide .item-info p,
-.slide p {
-    font-size: 0.9rem;
-    color: var(--text-light);
-    margin-bottom: 0;
-    line-height: 1.4;
-    /* Use line clamping for multi-line preview */
-    display: -webkit-box;
-    -webkit-line-clamp: 2; /* Show max 2 lines */
-    -webkit-box-orient: vertical;
-    overflow: hidden; /* Hide overflow beyond line-clamp */
-    text-overflow: ellipsis; /* Add ellipsis for line-clamp */
-    overflow-wrap: break-word;
-    word-break: break-word;
-}
-/* === End Slide Styles === */
-
-
-/* Specific Section Backgrounds */
+/* Saree Gallery Section (Slider Styles) */
 .saree-gallery { background-color: var(--light-gold-bg); }
-.new-arrivals-section { background-color: var(--background-section); }
+.gallery-slider-wrapper { position: relative; max-width: 1100px; margin: 2rem auto 0; overflow: hidden; padding: 0 5px; }
+.gallery-slider { display: flex; transition: transform 0.5s ease-in-out; }
+.gallery-slide { min-width: 85%; margin: 0 10px; flex-shrink: 0; background-color: var(--background-section); border-radius: 10px; overflow: hidden; box-shadow: var(--shadow-light); transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1); display: flex; flex-direction: column; }
+.gallery-slide:hover { transform: translateY(-8px); box-shadow: var(--shadow-hover); }
+.gallery-slide img { width: 100%; height: 300px; object-fit: cover; cursor: pointer; transition: transform 0.4s ease, filter 0.4s ease; }
+.gallery-slide:hover img { transform: scale(1.05); filter: brightness(1.03); }
+.gallery-slide .item-info { padding: 1rem 1.2rem; text-align: center; flex-grow: 1; }
+.gallery-slide .item-info h3 { margin-bottom: 0.4rem; font-size: 1.2rem; color: var(--primary-color); }
+.gallery-slide .item-info p { font-size: 0.9rem; color: var(--text-light); margin-bottom: 0; }
 
+/* New Arrivals Section (Slider Styles) */
+.new-arrivals-section { background-color: var(--background-section); }
+.slider-wrapper { position: relative; max-width: 1100px; margin: 1.5rem auto 0; overflow: hidden; padding: 0 5px; }
+.new-arrivals-slider { display: flex; transition: transform 0.5s ease-in-out; }
+.slide { min-width: 85%; margin: 0 10px; flex-shrink: 0; background-color: var(--background-light); border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-light); transition: transform 0.3s ease; }
+.slide:hover { transform: translateY(-5px); box-shadow: var(--shadow-medium); }
+.slide img { width: 100%; height: 280px; object-fit: cover; }
+.slide h3, .slide p { padding: 0.5rem 1rem; text-align: center; }
+.slide h3 { font-size: 1.1rem; color: var(--primary-color); margin-top: 0.5rem; margin-bottom: 0.3rem; }
+.slide p { font-size: 0.85rem; color: var(--text-light); padding-bottom: 1rem; margin-bottom: 0; }
 
 /* Generic Slider Button Styles */
-.slider-btn {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    background-color: rgba(255, 255, 255, 0.8); /* Slightly more opaque */
-    border: none;
-    color: var(--primary-color);
-    font-size: 1.5rem; /* Slightly larger icon */
-    padding: 0.7rem; /* Adjust padding */
-    border-radius: 50%;
-    cursor: pointer;
-    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
-    z-index: 10;
-    line-height: 1;
-    width: 45px; /* Slightly larger button */
-    height: 45px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-    opacity: 0.9;
-}
-.slider-btn:hover {
-    background-color: var(--primary-color);
-    color: #fff;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.4);
-    opacity: 1;
-}
-/* Adjust button positions for center mode if needed */
-.slider-btn.prev { left: -20px; } /* Move buttons further out */
-.slider-btn.next { right: -20px; }
-.slider-btn:disabled {
-    opacity: 0.3;
-    cursor: default;
-    background-color: rgba(200, 200, 200, 0.6);
-    box-shadow: none;
-    pointer-events: none;
-}
-
+.slider-btn { position: absolute; top: 50%; transform: translateY(-50%); background-color: rgba(255, 255, 255, 0.7); border: none; color: var(--primary-color); font-size: 1.3rem; padding: 0.6rem; border-radius: 50%; cursor: pointer; transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease; z-index: 10; line-height: 1; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 6px rgba(0,0,0,0.25); opacity: 0.85; }
+.slider-btn:hover { background-color: var(--primary-color); color: #fff; box-shadow: 0 4px 8px rgba(0,0,0,0.3); opacity: 1; }
+.slider-btn.prev { left: 10px; }
+.slider-btn.next { right: 10px; }
+.slider-btn:disabled { opacity: 0.3; cursor: default; background-color: rgba(200, 200, 200, 0.5); box-shadow: none; }
 
 /* --- Contact Section CSS --- */
-/* (Keep existing Contact Section styles - unchanged) */
 .contact-section { background-color: var(--background-light); }
 .contact-container { display: grid; grid-template-columns: 1fr; gap: 2rem; }
+/* Columns removed from base styles */
 .contact-details { padding-right: 0; }
 .contact-details h3 { color: var(--primary-color); font-size: clamp(1.5rem, 5vw, 1.8rem); margin-bottom: 1.2rem; }
 .contact-details p { display: flex; align-items: flex-start; margin-bottom: 1.2rem; font-size: 1rem; line-height: 1.6; color: var(--text-light); }
@@ -325,6 +198,8 @@ a:hover { color: var(--primary-color); }
 .contact-text a:hover { color: var(--primary-color); }
 .contact-map { margin-top: 1.5rem; border-radius: 8px; overflow: hidden; box-shadow: var(--shadow-medium);}
 .contact-map iframe { display: block; width: 100%; height: 300px; min-height: 250px; border: none; }
+
+/* Contact Form Styles */
 .contact-form-container { margin-top: 2rem; padding: 1.5rem; background-color: var(--background-section); border-radius: 8px; box-shadow: var(--shadow-light); }
 .contact-form-container h3 { text-align: center; color: var(--primary-color); margin-bottom: 1.5rem; font-size: 1.6rem; }
 .contact-form .form-group { margin-bottom: 1.2rem; }
@@ -341,15 +216,15 @@ a:hover { color: var(--primary-color); }
 .submit-button { display: inline-block; background: var(--primary-color); color: #fff; padding: 12px 35px; border-radius: 30px; font-weight: bold; font-size: 1rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s ease; box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15); border: none; cursor: pointer; }
 .submit-button:hover { background: var(--secondary-color); color: var(--text-dark); transform: translateY(-3px); box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2); }
 .submit-button:disabled { background-color: #cccccc; cursor: not-allowed; box-shadow: none; transform: none; }
-.form-status { display: block; margin-top: 1rem; font-weight: 500; text-align: center; min-height: 1.5em; padding: 8px; border-radius: 4px; display: none; }
-.form-status.success { color: #155724; background-color: #d4edda; border: 1px solid #c3e6cb; display: block; }
-.form-status.error { color: #721c24; background-color: #f8d7da; border: 1px solid #f5c6cb; display: block; }
-.form-status.sending { color: #004085; background-color: #cce5ff; border: 1px solid #b8daff; display: block; }
+.form-status { display: block; margin-top: 1rem; font-weight: 500; text-align: center; min-height: 1.5em; }
+.form-status.success { color: #155724; }
+.form-status.error { color: #721c24; }
+/* --- End Contact Form Styles --- */
+
 /* --- End Contact Section CSS --- */
 
 
 /* Footer (Mobile First) */
-/* (Keep existing Footer styles - unchanged) */
 .site-footer-bottom { background-color: var(--text-dark); color: #cccccc; padding: 2rem 0 1.5rem; margin-top: 2.5rem; text-align: center; }
 .footer-content p { color: #cccccc; margin-bottom: 0.5rem; font-size: 0.9rem; }
 .footer-content a { color: var(--background-light); }
@@ -359,29 +234,25 @@ a:hover { color: var(--primary-color); }
 .footer-social a:hover { color: var(--secondary-color); transform: scale(1.1); }
 
 /* Back to Top Button (Mobile First) */
-/* (Keep existing Back to Top styles - unchanged) */
 #back-to-top-btn { position: fixed; bottom: 20px; right: 20px; display: none; background-color: var(--primary-color); color: #fff; border: none; border-radius: 50%; width: 45px; height: 45px; font-size: 1.3rem; cursor: pointer; opacity: 0.8; transition: all 0.3s ease; z-index: 999; box-shadow: 0 3px 10px rgba(0,0,0,0.3); }
 #back-to-top-btn:hover { opacity: 1; background-color: var(--secondary-color); transform: scale(1.05); }
 
 /* Image Modal */
-/* (Keep existing Modal styles - unchanged, including caption) */
 .modal { display: none; position: fixed; z-index: 1001; padding-top: 50px; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0, 0, 0, 0.9); }
 .modal-content { margin: auto; display: block; width: 90%; max-width: 700px; border-radius: 5px; animation: zoom 0.4s; }
 @keyframes zoom { from {transform: scale(0.1)} to {transform: scale(1)} }
-#caption { margin: 15px auto 20px; display: block; width: 85%; max-width: 750px; text-align: center; color: #ddd; line-height: 1.5; }
-#caption h3 { font-size: 1.4rem; color: #fff; margin-bottom: 8px; font-family: var(--font-heading); }
-#caption p { font-size: 1rem; color: #ccc; margin-bottom: 0; font-family: var(--font-body); white-space: normal; }
+#caption { margin: 15px auto 0; display: block; width: 80%; max-width: 700px; text-align: center; color: #ddd; font-size: 1.1rem; }
 .close-modal { position: absolute; top: 15px; right: 25px; color: #fff; font-size: 35px; font-weight: bold; transition: 0.3s; cursor: pointer; opacity: 0.8; }
 .close-modal:hover, .close-modal:focus { color: #bbb; text-decoration: none; opacity: 1; }
 
 /* Animation Classes */
-/* (Keep existing Animation styles - unchanged) */
 .animate-on-scroll { opacity: 0; transition: opacity 0.8s ease-out, transform 0.8s ease-out; }
 .animate-on-scroll.fade-in { transform: translateY(25px); }
 .animate-on-scroll.is-visible { opacity: 1; transform: translateY(0); }
 
+
 /* ------------------------- */
-/* --- Responsive Styles --- */
+/* --- Tablet Styles --- */
 /* ------------------------- */
 @media (min-width: 600px) {
     :root { font-size: 15.5px; }
@@ -390,21 +261,19 @@ a:hover { color: var(--primary-color); }
     .section-title::after { width: 70px; }
     .section-subtitle { font-size: 1.05rem; }
     .features-grid { grid-template-columns: repeat(2, 1fr); }
-
-    /* Slider Tablet */
-    .gallery-slide, .slide {
-        min-width: 60%; /* Adjust min-width for center mode */
-    }
-    .gallery-slide img, .slide img { height: 320px; }
-    /* Adjust button positions */
-    .slider-btn.prev { left: 5px; }
-    .slider-btn.next { right: 5px; }
-
+    .gallery-slide { min-width: calc(50% - 20px); }
+    .gallery-slide img { height: 320px; }
+    .slide { min-width: calc(50% - 20px); }
+    .slide img { height: 300px; }
     .contact-map iframe { height: 350px; min-height: 300px; }
     .hero { min-height: 70vh; }
     .hero p { font-size: 1.2rem; }
 }
 
+
+/* ----------------------------------- */
+/* --- Desktop / Larger Tablet Styles --- */
+/* ----------------------------------- */
 @media (min-width: 768px) {
      :root { font-size: 16px; }
      .navbar .container { padding: 0 30px; }
@@ -418,21 +287,46 @@ a:hover { color: var(--primary-color); }
      .logo-image { height: 40px; }
      .logo-text { font-size: 1.8rem; }
      .hero { min-height: 75vh; }
+     .gallery-slide { min-width: calc(33.333% - 20px); }
+     .gallery-slide img { height: 340px; }
+     .slide { min-width: calc(33.333% - 20px); }
+     .slide img { height: 310px; }
 
-     /* Slider Desktop */
-     .gallery-slide, .slide {
-         min-width: 45%; /* Adjust min-width for center mode */
+     /* === New Contact Section Layout using Grid Areas === */
+     .contact-container {
+         display: grid;
+         grid-template-columns: 1fr 1fr; /* Define 2 equal columns */
+         grid-template-areas:
+             "details map"    /* Row 1: Details left, Map right */
+             "form    form";  /* Row 2: Form spans both columns */
+         gap: 2.5rem; /* Adjust gap between grid items */
+         align-items: flex-start; /* Align items to the top of their area */
      }
-     .gallery-slide img, .slide img { height: 340px; }
-     /* Adjust button positions */
-     .slider-btn.prev { left: 0px; }
-     .slider-btn.next { right: 0px; }
 
-     /* Contact Layout */
-     .contact-container { display: grid; grid-template-columns: 1fr 1fr; grid-template-areas: "details map" "form form"; gap: 2.5rem; align-items: flex-start; }
-     .contact-details { grid-area: details; margin-bottom: 0; }
-     .contact-map { grid-area: map; width: 100%; aspect-ratio: 1 / 1; border-radius: 8px; overflow: hidden; margin-top: 0; }
-     .contact-map iframe { width: 100%; height: 100%; min-height: initial; aspect-ratio: initial; border: none; border-radius: 0; }
+     /* Assign elements to grid areas */
+     .contact-details {
+         grid-area: details;
+         margin-bottom: 0; /* Remove bottom margin as form is below */
+     }
+
+     .contact-map {
+         grid-area: map;
+         width: 100%;         /* Take full width of its grid area */
+         aspect-ratio: 1 / 1; /* Keep it square */
+         border-radius: 8px;
+         overflow: hidden;
+         margin-top: 0; /* Reset mobile margin */
+     }
+     .contact-map iframe {
+        display: block;
+        width: 100%;
+        height: 100%; /* Fill the square container */
+        min-height: initial; /* Override min-height */
+        aspect-ratio: initial; /* Remove aspect ratio from iframe itself */
+        border: none;
+        border-radius: 0;
+     }
+
      .contact-form-container {
          grid-area: form;
          margin-top: 1rem;    /* Add some space above the form */
@@ -443,10 +337,24 @@ a:hover { color: var(--primary-color); }
          margin-left: auto; /* Center if max-width is applied */
          margin-right: auto;
      }
+     .contact-form {
+        /* Reset flex properties from previous attempt if any */
+        flex-grow: initial;
+        display: block; /* Back to default block layout */
+        min-height: initial;
+     }
+      .contact-form .form-group:last-of-type {
+         margin-top: 1.5rem; /* Ensure submit button has standard margin */
+     }
+     /* === End New Contact Section Layout === */
 }
 
+
+/* ----------------------------- */
+/* --- Larger Desktop Styles --- */
+/* ----------------------------- */
 @media (min-width: 992px) {
-    .container { width: 85%; max-width: 1100px; }
+    .container { width: 85%; }
     .section-padding { padding: 5rem 0; }
     .navbar .container { padding: 0 40px; }
     h2 { font-size: clamp(2.2rem, 4vw, 2.8rem); }
@@ -462,18 +370,18 @@ a:hover { color: var(--primary-color); }
     .features-grid { grid-template-columns: repeat(4, 1fr); gap: 2rem; }
     .feature-item { padding: 2rem 1.5rem; }
     .feature-icon { font-size: 2.8rem; }
+    .gallery-slide { min-width: calc(25% - 20px); }
+    .gallery-slide img { height: 350px; }
+    .slide { min-width: calc(33.333% - 20px); }
+    .slide img { height: 320px; }
+    .slider-btn { padding: 0.8rem; width: 45px; height: 45px; font-size: 1.5rem; }
+    .slider-wrapper .slider-btn.prev,
+    .gallery-slider-wrapper .slider-btn.prev { left: 15px; }
+    .slider-wrapper .slider-btn.next,
+    .gallery-slider-wrapper .slider-btn.next { right: 15px; }
 
-     /* Slider Large Desktop */
-     .gallery-slide, .slide {
-         min-width: 35%; /* Adjust min-width for center mode */
-     }
-     .gallery-slide img, .slide img { height: 350px; }
-     /* Adjust button positions */
-     .slider-btn.prev { left: -15px; }
-     .slider-btn.next { right: -15px; }
-
-    /* Contact */
-    .contact-map { max-width: 550px; margin-left: 0; margin-right: 0; }
+    /* Contact Section */
+    .contact-map { max-width: 550px; margin-left: 0; margin-right: 0; /* Align map within its grid cell */ }
     .contact-form-container { padding: 2rem; max-width: 900px; }
 
     .site-footer-bottom { padding: 2.5rem 0; }
@@ -481,21 +389,6 @@ a:hover { color: var(--primary-color); }
 }
 
 @media (min-width: 1200px) {
-     .container { max-width: 1200px; }
-     /* Slider Extra Large Desktop */
-     .gallery-slide, .slide {
-         min-width: 30%; /* Adjust min-width for center mode */
-     }
-      /* Adjust button positions */
-     .slider-btn.prev { left: -25px; }
-     .slider-btn.next { right: -25px; }
+    .gallery-slide { min-width: calc(25% - 20px); }
+    .slide { min-width: calc(33.333% - 20px); }
 }
-
-/* ------------------------- */
-/* --- Mobile-Specific Overrides --- */
-/* (Applies to screens UP TO 599px wide) */
-/* ------------------------- */
-/* -------------------------------- */
-/* --- Very Small Screen Overrides --- */
-/* (Applies ONLY up to 599px wide) */
-/* -------------------------------- */
