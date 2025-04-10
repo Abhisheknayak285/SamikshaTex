@@ -1,340 +1,445 @@
 document.addEventListener('DOMContentLoaded', () => {
 
+    // --- Configuration ---
+    const publicApiUrl = 'https://script.google.com/macros/s/AKfycbz1wOHAYnl6XihWKCEui-0T00spZinXcNDAvVjCnlc8O-sRLOp_zP-2Vm-eOnz2LLbE5A/exec'; // <<< REPLACE WITH YOUR PUBLIC FETCHING URL
+    const contactFormScriptURL = 'https://script.google.com/macros/s/AKfycbx9dCFy_hZu2wFZu60NZgQQ_rT1ZcLXqQ8ahbHRtQc31AJ2khUMSm4vCawWBpvubjLEGA/exec'; // <<< REPLACE WITH YOUR CONTACT FORM URL
+    //new
+    
+    let TRUNCATE_LENGTH = 50; // Default Max characters for preview text in slides
+    // Check window width and adjust if necessary
+    if (window.innerWidth < 599) {
+        TRUNCATE_LENGTH = 15; // Use shorter length for small screens
+    }
+    
+    //end
+    const SLIDER_TRANSITION_DURATION = 500; // Milliseconds, match CSS if possible
+
+    // --- Helper Function for Text Truncation ---
+    function truncateText(text, maxLength) {
+        if (typeof text !== 'string') return '';
+        if (text.length <= maxLength) {
+            return text;
+        }
+        // Find the last space within the maxLength to avoid cutting words
+        let truncated = text.substring(0, maxLength);
+        let lastSpace = truncated.lastIndexOf(' ');
+        if (lastSpace > maxLength / 2) { // Only cut at space if it's reasonably far in
+            truncated = truncated.substring(0, lastSpace);
+        }
+        return truncated.trim() + '...';
+    }
+
     // --- Mobile Menu Toggle ---
     const menuToggle = document.getElementById('mobile-menu');
     const navLinks = document.querySelector('.nav-links');
-
     if (menuToggle && navLinks) {
         menuToggle.addEventListener('click', () => {
             menuToggle.classList.toggle('is-active');
             navLinks.classList.toggle('active');
-            // Prevent body scroll when mobile menu is open
             document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
         });
-
-        // Close menu when a link is clicked
         navLinks.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', () => {
-                 if (navLinks.classList.contains('active')) {
+                if (navLinks.classList.contains('active')) {
                     menuToggle.classList.remove('is-active');
                     navLinks.classList.remove('active');
-                    document.body.style.overflow = ''; // Restore scroll
-                 }
+                    document.body.style.overflow = '';
+                }
             });
         });
-
-        // Close menu if clicked outside the nav on mobile
         document.addEventListener('click', (event) => {
             const isClickInsideNav = navLinks.contains(event.target);
             const isClickOnToggle = menuToggle.contains(event.target);
-            // Only close if the menu is active and the click is outside both nav and toggle
             if (navLinks.classList.contains('active') && !isClickInsideNav && !isClickOnToggle) {
                 menuToggle.classList.remove('is-active');
                 navLinks.classList.remove('active');
-                document.body.style.overflow = ''; // Restore scroll
+                document.body.style.overflow = '';
             }
         });
     }
 
-
-    // --- Image Modal ---
+    // --- Image Modal Setup ---
     const modal = document.getElementById("imageModal");
     const modalImg = document.getElementById("modalImage");
     const captionText = document.getElementById("caption");
-    // Query images in both gallery and new arrivals sliders
-    const imagesForModal = document.querySelectorAll('.gallery-slide img, .slide img');
     const closeModalBtn = document.querySelector(".close-modal");
 
-    if (modal && modalImg && captionText && imagesForModal.length > 0 && closeModalBtn) {
-        imagesForModal.forEach(img => {
-            img.addEventListener('click', function() {
-                modal.style.display = "block";
-                document.body.style.overflow = 'hidden'; // Prevent background scrolling
-                modalImg.src = this.src;
+    // Function to attach modal listeners
+    function setupModalListeners(selector) {
+        const imagesForModal = document.querySelectorAll(selector);
 
-                // Try to get caption from parent slide's h3 tag
-                let itemCaption = this.alt; // Default to alt text
-                const parentSlide = this.closest('.gallery-slide') || this.closest('.slide'); // Check both types
-                if (parentSlide) {
-                    const h3 = parentSlide.querySelector('h3');
-                    if(h3) itemCaption = h3.textContent;
-                }
-                captionText.innerHTML = itemCaption;
-            });
+        // Detach previous listeners
+         document.querySelectorAll(selector).forEach(img => {
+            const clone = img.cloneNode(true);
+            if (img.parentNode) { img.parentNode.replaceChild(clone, img); }
         });
 
-        // Function to close the modal
-        const closeModalAction = () => {
-            modal.style.display = "none";
-            document.body.style.overflow = ''; // Restore background scrolling
-        }
+        // Attach new listeners
+        document.querySelectorAll(selector).forEach(img => {
+            img.addEventListener('click', function() {
+                if (!modal || !modalImg || !captionText) return;
 
-        // Event listeners for closing the modal
-        closeModalBtn.onclick = closeModalAction;
-        modal.onclick = function(event) { if (event.target === modal) { closeModalAction(); } }
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal.style.display === "block") { closeModalAction(); } });
+                modal.style.display = "block";
+                document.body.style.overflow = 'hidden';
+                modalImg.src = this.src;
+
+                let fullName = this.alt;
+                let fullInfo = '';
+                const parentSlide = this.closest('.gallery-slide, .slide');
+                if (parentSlide) {
+                    fullName = parentSlide.dataset.fullName || fullName;
+                    fullInfo = parentSlide.dataset.fullInfo || '';
+                }
+                captionText.innerHTML = `<h3>${fullName}</h3><p>${fullInfo}</p>`;
+            });
+        });
     }
 
+    // Function to close the modal
+    const closeModalAction = () => {
+         if(modal){ modal.style.display = "none"; document.body.style.overflow = ''; }
+    }
+    // Attach modal closing listeners once
+    if(closeModalBtn) closeModalBtn.onclick = closeModalAction;
+    if(modal) modal.onclick = function(event) { if (event.target === modal) { closeModalAction(); } }
+    document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal && modal.style.display === "block") { closeModalAction(); } });
+    // --- End Image Modal Setup ---
 
-    // --- Reusable Slider Function ---
+
+    // --- REVISED Reusable Slider Function (Center Mode + Infinite Loop) ---
     function setupSlider(sliderId, prevBtnId, nextBtnId) {
-        // console.log(`Setting up slider: ${sliderId}`); // DEBUG: Check if function is called
         const slider = document.getElementById(sliderId);
         const prevBtn = document.getElementById(prevBtnId);
         const nextBtn = document.getElementById(nextBtnId);
-        // Find the correct parent wrapper class
         const sliderWrapper = slider ? slider.closest('.slider-wrapper, .gallery-slider-wrapper') : null;
 
-        // DEBUG: Check if elements are found
-        // if (!slider) console.error(`Slider element not found: #${sliderId}`);
-        // if (!prevBtn) console.error(`Previous button not found: #${prevBtnId}`);
-        // if (!nextBtn) console.error(`Next button not found: #${nextBtnId}`);
-        // if (!sliderWrapper) console.error(`Slider wrapper not found for: #${sliderId}`);
-
         if (!slider || !prevBtn || !nextBtn || !sliderWrapper) {
-            console.warn(`Slider setup aborted for: ${sliderId}. Essential elements missing.`);
-            return; // Exit if essential elements are missing
+            console.warn(`Slider setup aborted for: ${sliderId}. Missing elements.`);
+            if (prevBtn) prevBtn.disabled = true; if (nextBtn) nextBtn.disabled = true;
+            return;
         }
 
-        const slides = slider.querySelectorAll('.slide, .gallery-slide'); // Select both types of slides
-        // console.log(`Found ${slides.length} slides for ${sliderId}`); // DEBUG: Check slide count
-        let currentIndex = 0;
+        let originalSlides = [];
+        let allSlides = []; // Includes clones
+        let originalTotalSlides = 0;
+        let itemsVisibleApprox = 1; // How many roughly fit (for cloning)
         let slideWidth = 0;
-        let itemsVisible = 1;
+        let containerWidth = 0;
+        let isInfinite = false;
+        let currentIndex = 0; // Index of the slide to be centered
+        let isTransitioning = false;
+        let cloneCount = 0;
 
-        function calculateSlideMetrics() {
-            if (slides.length > 0) {
-                 const style = window.getComputedStyle(slides[0]);
-                 const marginRight = parseInt(style.marginRight, 10) || 0;
-                 const marginLeft = parseInt(style.marginLeft, 10) || 0;
-                 slideWidth = slides[0].offsetWidth + marginLeft + marginRight;
-                 // Check for valid wrapper width and slide width
-                 if (sliderWrapper.offsetWidth > 0 && slideWidth > 0) {
-                    itemsVisible = Math.max(1, Math.floor(sliderWrapper.offsetWidth / slideWidth));
-                 } else {
-                    itemsVisible = 1; // Default if calculation fails
-                 }
-                 // DEBUG: Log calculated values
-                 // console.log(`${sliderId} - slideWidth: ${slideWidth}, wrapperWidth: ${sliderWrapper.offsetWidth}, itemsVisible: ${itemsVisible}`);
+        function initializeSlider() {
+            isTransitioning = false; // Reset flag
+            originalSlides = slider.querySelectorAll('.slide:not(.clone), .gallery-slide:not(.clone)');
+            originalTotalSlides = originalSlides.length;
+
+            prevBtn.disabled = false; nextBtn.disabled = false; // Enable for checks
+
+            if (originalTotalSlides === 0) {
+                prevBtn.disabled = true; nextBtn.disabled = true; return;
+            }
+
+            calculateDimensions(); // Calculate widths and visible items first
+
+            isInfinite = originalTotalSlides > 1; // Loop if more than 1 slide
+
+            // Clean up previous clones
+            const oldClones = slider.querySelectorAll('.clone');
+            oldClones.forEach(clone => clone.remove());
+            cloneCount = 0; // Reset clone count
+
+            if (isInfinite) {
+                // Clone enough slides to fill approx visible area on each side
+                cloneCount = Math.max(1, Math.ceil(itemsVisibleApprox)); // Clone at least 1, or enough to fill view
+
+                // Prepend clones of last slides
+                for (let i = 0; i < cloneCount; i++) {
+                    if (originalSlides[originalTotalSlides - 1 - (i % originalTotalSlides)]) { // Loop if cloneCount > total
+                        const clone = originalSlides[originalTotalSlides - 1 - (i % originalTotalSlides)].cloneNode(true);
+                        clone.classList.add('clone'); slider.insertBefore(clone, slider.firstChild);
+                    }
+                }
+                // Append clones of first slides
+                for (let i = 0; i < cloneCount; i++) {
+                    if (originalSlides[i % originalTotalSlides]) { // Loop if cloneCount > total
+                        const clone = originalSlides[i % originalTotalSlides].cloneNode(true);
+                        clone.classList.add('clone'); slider.appendChild(clone);
+                    }
+                }
+                currentIndex = cloneCount; // Start centered on the first original slide
             } else {
-                slideWidth = 0;
-                itemsVisible = 1;
+                currentIndex = 0; // Start centered on the first slide
+            }
+
+            allSlides = slider.querySelectorAll('.slide, .gallery-slide'); // Update total list including clones
+            slider.style.transition = 'none'; // No transition for initial set
+            centerSlide(currentIndex, false); // Center initial slide instantly
+            // Re-enable transition after a tiny delay
+            setTimeout(() => {
+                if (slider) slider.style.transition = `transform ${SLIDER_TRANSITION_DURATION / 1000}s ease-in-out`;
+            }, 50);
+
+            updateButtonStates(); // Update buttons based on initial state
+        }
+
+        function calculateDimensions() {
+            containerWidth = sliderWrapper.offsetWidth;
+            const currentSlides = slider.querySelectorAll('.slide, .gallery-slide'); // Use current total slides for calculation
+
+            if (currentSlides.length > 0) {
+                const style = window.getComputedStyle(currentSlides[0]);
+                const marginRight = parseInt(style.marginRight, 10) || 0;
+                const marginLeft = parseInt(style.marginLeft, 10) || 0;
+                if (currentSlides[0].offsetWidth > 0) {
+                    slideWidth = currentSlides[0].offsetWidth + marginLeft + marginRight;
+                } else { slideWidth = containerWidth * 0.8; console.warn(`${sliderId}: Slide offsetWidth 0, estimating.`); } // Estimate if needed
+
+                if (containerWidth > 0 && slideWidth > 0) {
+                     // Calculate approx how many items fit for cloning strategy
+                     itemsVisibleApprox = Math.max(1, containerWidth / slideWidth);
+                } else { itemsVisibleApprox = 1; }
+            } else { slideWidth = 0; itemsVisibleApprox = 1; }
+        }
+
+        function updateButtonStates() {
+            if (originalTotalSlides <= 1) { // Disable if only 1 slide
+                prevBtn.disabled = true;
+                nextBtn.disabled = true;
+            } else if (!isInfinite) { // Non-infinite logic
+                prevBtn.disabled = currentIndex === 0;
+                nextBtn.disabled = currentIndex === originalTotalSlides - 1;
+            } else { // Infinite loop - always enabled if more than 1 slide
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
             }
         }
 
-        function updateSliderPosition() {
-            calculateSlideMetrics(); // Recalculate on update
-            if (slideWidth <= 0 || slides.length === 0) return; // Exit if no slides or invalid width
+        // Function to apply centering transform and manage active class
+        function centerSlide(index, useTransition = true) {
+            if (isTransitioning && useTransition) return;
+            if (!slideWidth || allSlides.length === 0) return; // Can't center if width is 0 or no slides
 
-            // Ensure itemsVisible is at least 1, even if calculation seems off
-             itemsVisible = Math.max(1, itemsVisible);
+            if (useTransition) isTransitioning = true;
 
-            const maxIndex = Math.max(0, slides.length - itemsVisible);
-            currentIndex = Math.max(0, Math.min(currentIndex, maxIndex));
+            // Calculate offset needed to center the slide at 'index'
+            const containerCenter = containerWidth / 2;
+            // Center of the target slide = (start position) + (half its width without margin)
+            const targetSlideElement = allSlides[index];
+            const targetSlideWidth = targetSlideElement ? targetSlideElement.offsetWidth : slideWidth; // Use actual width if possible
+            const slideCenter = (index * slideWidth) + (targetSlideWidth / 2);
+            const offsetX = containerCenter - slideCenter;
 
-            const offset = -currentIndex * slideWidth;
-            slider.style.transform = `translateX(${offset}px)`;
-            // DEBUG: Log slider movement
-            // console.log(`${sliderId} - Moving to index: ${currentIndex}, offset: ${offset}px`);
+            // Apply Transform
+            slider.style.transition = useTransition ? `transform ${SLIDER_TRANSITION_DURATION / 1000}s ease-in-out` : 'none';
+            slider.style.transform = `translateX(${offsetX}px)`;
 
-            prevBtn.disabled = currentIndex === 0;
-            nextBtn.disabled = currentIndex >= maxIndex;
-            // DEBUG: Log button states
-            // console.log(`${sliderId} - Prev disabled: ${prevBtn.disabled}, Next disabled: ${nextBtn.disabled} (maxIndex: ${maxIndex})`);
+            // Update Active Class
+            allSlides.forEach((slide, i) => {
+                 slide.classList.toggle('active', i === index);
+            });
+
+            currentIndex = index; // Update the current centered index
+
+            // Update Buttons (deferred slightly if using transition)
+            if (useTransition) { setTimeout(updateButtonStates, 50); }
+            else { updateButtonStates(); }
+
+            // Reset transitioning flag
+             if (useTransition) { setTimeout(() => { isTransitioning = false; }, SLIDER_TRANSITION_DURATION); }
+             else { isTransitioning = false; }
         }
 
+
+        // --- Event Listeners for Slider ---
         nextBtn.addEventListener('click', () => {
-            // console.log(`${sliderId} - Next button clicked`); // DEBUG: Check click event
-            // Recalculate itemsVisible right before potentially moving
-            calculateSlideMetrics();
-            itemsVisible = Math.max(1, itemsVisible); // Ensure it's at least 1
-            const maxIndex = Math.max(0, slides.length - itemsVisible);
-            if (currentIndex < maxIndex) {
-                currentIndex++;
-                updateSliderPosition();
-            } else {
-                // console.log(`${sliderId} - Already at max index (${currentIndex})`); // DEBUG: Log if at end
+            if (isTransitioning || nextBtn.disabled) return;
+
+            let nextIndex = currentIndex + 1;
+            centerSlide(nextIndex, true); // Move with transition
+
+            // Infinite Loop Check: If moved into the appended clones area
+            if (isInfinite && nextIndex >= (cloneCount + originalTotalSlides)) {
+                // After transition finishes, jump instantly to the first original slide
+                setTimeout(() => {
+                    centerSlide(cloneCount, false); // Jump to first original (index = cloneCount)
+                }, SLIDER_TRANSITION_DURATION);
             }
         });
 
         prevBtn.addEventListener('click', () => {
-            // console.log(`${sliderId} - Prev button clicked`); // DEBUG: Check click event
-            if (currentIndex > 0) {
-                currentIndex--;
-                updateSliderPosition();
-            } else {
-                // console.log(`${sliderId} - Already at index 0`); // DEBUG: Log if at beginning
+            if (isTransitioning || prevBtn.disabled) return;
+
+            let prevIndex = currentIndex - 1;
+            centerSlide(prevIndex, true); // Move with transition
+
+            // Infinite Loop Check: If moved into the prepended clones area
+            if (isInfinite && prevIndex < cloneCount) {
+                // After transition finishes, jump instantly to the last original slide
+                setTimeout(() => {
+                    const jumpToIndex = cloneCount + originalTotalSlides - 1; // Index of last original slide
+                    centerSlide(jumpToIndex, false);
+                }, SLIDER_TRANSITION_DURATION);
             }
         });
 
-        // Debounce function to limit resize event frequency
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => { clearTimeout(timeout); func(...args); };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
+        // --- Resize Handling ---
+        function debounce(func, wait) { let timeout; return function(...args) { clearTimeout(timeout); timeout = setTimeout(() => func.apply(this, args), wait); }; }
+        const debouncedResizeUpdate = debounce(() => {
+            const oldItemsVisibleApprox = itemsVisibleApprox; // Store previous approximate count
+            calculateDimensions(); // Recalc container/slide width and approx visible items
+            // If infinite loop active AND the approx number of visible items changed, re-init fully
+            if (isInfinite && Math.ceil(itemsVisibleApprox) !== Math.ceil(oldItemsVisibleApprox)) {
+                console.log(`${sliderId} - Re-initializing slider due to significant change in visible items.`);
+                initializeSlider(); // Re-run setup including cloning
+            } else {
+                // Otherwise, just re-center the current slide based on new dimensions
+                centerSlide(currentIndex, false);
+                 updateButtonStates(); // Update buttons based on possibly new slideWidth/containerWidth relationship
+            }
+        }, 250);
+        window.addEventListener('resize', debouncedResizeUpdate);
 
-        const debouncedUpdate = debounce(updateSliderPosition, 200); // Slightly longer debounce
-        window.addEventListener('resize', debouncedUpdate);
 
-        // Add animation class to slides
-         slides.forEach(slide => {
-            if (!slide.classList.contains('animate-on-scroll')) {
-                slide.classList.add('animate-on-scroll', 'fade-in');
-             }
-         });
+        // --- Initial Call ---
+        setTimeout(initializeSlider, 100); // Init after slight delay
 
-        // Initial setup after a slightly longer delay for layout stability
-        setTimeout(updateSliderPosition, 200);
-    }
-
-    // --- Initialize Sliders ---
-    // Make sure these IDs exactly match your HTML button/slider IDs!
-    setupSlider('gallerySlider', 'galleryPrevBtn', 'galleryNextBtn');
-    setupSlider('newArrivalsSlider', 'newArrivalsPrevBtn', 'newArrivalsNextBtn');
+    } // --- End setupSlider Function ---
 
 
     // --- Intersection Observer for Scroll Animations ---
-    let observer; // Define observer in a scope accessible by observeElements
-
+    let observer;
     function observeElements() {
-        // Target elements with class 'animate-on-scroll' that are NOT already visible
-        const animatedElements = document.querySelectorAll('.animate-on-scroll:not(.is-visible)');
-
-        // Initialize observer only if it doesn't exist
-        if (!observer) {
-            observer = new IntersectionObserver((entries, observerInstance) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add('is-visible');
-                        observerInstance.unobserve(entry.target); // Stop observing once visible
-                    }
-                });
-            }, {
-                threshold: 0.1 // Trigger when 10% of the element is visible
-                // rootMargin: '0px 0px -50px 0px' // Optional: Adjust trigger point relative to viewport
+         if (observer) observer.disconnect();
+        const animatedElements = document.querySelectorAll('.animate-on-scroll');
+        if (!('IntersectionObserver' in window)) { animatedElements.forEach(el => el.classList.add('is-visible')); return; }
+        observer = new IntersectionObserver((entries, observerInstance) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) { entry.target.classList.add('is-visible'); observerInstance.unobserve(entry.target); }
             });
-        }
-
-        // Observe each non-visible animated element if it's currently displayed
-        animatedElements.forEach(el => {
-            // Check if element is actually displayed before observing
-             if (window.getComputedStyle(el).display !== 'none') {
-                observer.observe(el);
-             }
-        });
+        }, { threshold: 0.1 });
+        animatedElements.forEach(el => { if (el.offsetParent !== null) observer.observe(el); });
     }
-
-    // Initial call to observe elements on page load
-    observeElements();
 
 
     // --- Back to Top Button ---
     const backToTopButton = document.getElementById("back-to-top-btn");
-
     if (backToTopButton) {
-        const scrollThreshold = 300; // Pixels to scroll before showing button
-
-        window.addEventListener('scroll', () => {
-            // Use window.scrollY for modern browsers
-            if (window.scrollY > scrollThreshold) {
-                backToTopButton.style.display = "block";
-            } else {
-                backToTopButton.style.display = "none";
+        const scrollThreshold = 300;
+        let isVisible = false;
+        const checkScroll = () => {
+            const shouldBeVisible = window.scrollY > scrollThreshold;
+            if (shouldBeVisible !== isVisible) {
+                backToTopButton.style.display = shouldBeVisible ? "block" : "none";
+                isVisible = shouldBeVisible;
             }
-        }, { passive: true }); // Improve scroll performance
-
-        backToTopButton.addEventListener("click", (e) => {
-            e.preventDefault(); // Prevent default anchor behavior if it were an anchor
-            window.scrollTo({
-                top: 0,
-                behavior: 'smooth' // Native smooth scrolling
-            });
-        });
-    }
+        };
+        window.addEventListener('scroll', checkScroll, { passive: true });
+        backToTopButton.addEventListener("click", (e) => { e.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+        checkScroll(); // Initial check
+     }
 
 
     // --- Google Sheet Contact Form Submission ---
-    // !!! IMPORTANT: REPLACE THE PLACEHOLDER URL BELOW !!!
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbx9dCFy_hZu2wFZu60NZgQQ_rT1ZcLXqQ8ahbHRtQc31AJ2khUMSm4vCawWBpvubjLEGA/exec'; // *** REPLACE THIS!!! ***
-    const form = document.forms['submit-to-google-sheet']; // Ensure your <form> has name="submit-to-google-sheet"
-    const formStatus = document.getElementById('form-status');
-    const submitButton = form ? form.querySelector('button[type="submit"]') : null;
-
-    if (form && submitButton) {
-        form.addEventListener('submit', e => {
-            e.preventDefault(); // Prevent default form submission
-
-            // Disable button and show 'sending' message
-            submitButton.disabled = true;
-            if(formStatus) formStatus.textContent = 'Sending...';
-            if(formStatus) formStatus.className = 'form-status'; // Reset class
-
-            fetch(scriptURL, { method: 'POST', body: new FormData(form)})
-                .then(response => {
-                    // Check if response is ok (status 200-299)
-                    if (!response.ok) {
-                         // Try to get error details if server provided JSON error response
-                         return response.json().then(errData => {
-                            throw new Error(errData.error || `Server responded with status ${response.status}`);
-                         }).catch(() => {
-                            // Fallback if response wasn't JSON or other error parsing
-                            throw new Error(`Server responded with status ${response.status}`);
-                         });
-                    }
-                    return response.json(); // Parse JSON response from Apps Script
-                })
-                .then(data => {
-                    // Check the result field from the Apps Script response
-                    if (data.result === 'success') {
-                        console.log('Form Success:', data);
-                        if(formStatus) formStatus.textContent = 'Message sent successfully!';
-                        if(formStatus) formStatus.classList.add('success');
-                        form.reset(); // Clear the form fields
-                        submitButton.disabled = false; // Re-enable button
-                        // Optional: Hide success message after a few seconds
-                        setTimeout(() => { if(formStatus) { formStatus.textContent = ''; formStatus.className = 'form-status'; } }, 5000);
-                    } else {
-                        // Handle application-level errors returned from Apps Script
-                        throw new Error(data.error || 'Submission failed.');
-                    }
-                })
-                .catch(error => {
-                    // Handle fetch errors (network issues) or errors thrown above
-                    console.error('Form Error!', error.message);
-                    if(formStatus) formStatus.textContent = 'Error sending message. Please try again.';
-                    if(formStatus) formStatus.classList.add('error');
-                    submitButton.disabled = false; // Re-enable button
-                     // Optional: Hide error message after a few seconds
-                     setTimeout(() => { if(formStatus) { formStatus.textContent = ''; formStatus.className = 'form-status'; } }, 5000);
-                });
+    const contactForm = document.forms['submit-to-google-sheet'];
+    const contactFormStatus = document.getElementById('form-status');
+    const contactSubmitButton = contactForm ? contactForm.querySelector('button[type="submit"]') : null;
+    if (contactForm && contactSubmitButton) {
+        contactForm.addEventListener('submit', e => {
+            e.preventDefault(); contactSubmitButton.disabled = true;
+            if(contactFormStatus) { contactFormStatus.textContent = 'Sending...'; contactFormStatus.className = 'form-status sending'; contactFormStatus.style.display = 'block'; }
+            fetch(contactFormScriptURL, { method: 'POST', body: new FormData(contactForm)})
+            .then(response => { if (!response.ok) { return response.json().catch(() => { throw new Error(`Server status ${response.status}`); }).then(errData => { throw new Error(errData.error || `Server error`); }); } return response.json(); })
+            .then(data => { if (data.result === 'success') { if(contactFormStatus) { contactFormStatus.textContent = 'Message sent!'; contactFormStatus.className = 'form-status success'; } contactForm.reset(); } else { throw new Error(data.error || 'Failed.'); } })
+            .catch(error => { console.error('Contact Form Error!', error.message); if(contactFormStatus) { contactFormStatus.textContent = 'Error sending message.'; contactFormStatus.className = 'form-status error'; } })
+            .finally(() => { contactSubmitButton.disabled = false; if(contactFormStatus) { setTimeout(() => { contactFormStatus.style.display = 'none'; }, 5000); } });
         });
-    } else {
-        if (!form) console.error("Contact form not found (make sure <form> has name='submit-to-google-sheet').");
-        if (!submitButton) console.error("Submit button not found in the contact form.");
     }
-    // --- End Google Sheet Contact Form Submission ---
 
 
     // --- Update Footer Year ---
     const currentYearSpan = document.getElementById('current-year');
-    if (currentYearSpan) {
-        try {
-            // Get the current year based on Approximate IST (Asia/Kolkata)
-            const now = new Date();
-            // Options specify the timezone; use 'en-IN' or 'en-US' for locale preference if needed
-            const options = { timeZone: 'Asia/Kolkata', year: 'numeric' };
-            const formatter = new Intl.DateTimeFormat('en-US', options);
-            const currentYear = formatter.format(now);
-            currentYearSpan.textContent = currentYear;
-        } catch (e) {
-            // Fallback if Intl or timezone is not supported
-            console.warn("Could not get timezone-specific year, using local year.", e);
-            currentYearSpan.textContent = new Date().getFullYear();
+    if (currentYearSpan) { try { const now = new Date(); const options = { timeZone: 'Asia/Kolkata', year: 'numeric' }; const formatter = new Intl.DateTimeFormat('en-US', options); currentYearSpan.textContent = formatter.format(now); } catch (e) { currentYearSpan.textContent = new Date().getFullYear(); } }
+
+
+    // --- Generic Function to Load Items for Sliders ---
+    function loadAndDisplayItems(config) {
+        const sliderElement = document.getElementById(config.sliderId);
+        const loadingMessage = document.getElementById(config.loadingMsgId);
+        const prevBtn = document.getElementById(config.prevBtnId);
+        const nextBtn = document.getElementById(config.nextBtnId);
+
+        const disableControls = () => { if(prevBtn) prevBtn.disabled = true; if(nextBtn) nextBtn.disabled = true; }
+        const showLoading = () => {
+             if (!sliderElement) return;
+             if (loadingMessage) loadingMessage.style.display = 'block';
+             sliderElement.innerHTML = ''; if (loadingMessage) sliderElement.appendChild(loadingMessage);
+             disableControls();
         }
+        const showError = (message) => {
+             if (!sliderElement) return;
+             console.error(`Workspace/Process Error (${config.sliderId}):`, message);
+             if (loadingMessage) loadingMessage.style.display = 'none';
+             sliderElement.innerHTML = `<p style="text-align: center; padding: 20px; color: #dc3545;">Could not load items. ${message}</p>`;
+             disableControls();
+        }
+
+        if (!sliderElement) { console.error(`Slider container #${config.sliderId} not found.`); return; }
+        showLoading();
+
+        const payload = { action: 'getItems' };
+        fetch(publicApiUrl, { method: 'POST', headers: { 'Content-Type': 'application/x-www-form-urlencoded', }, body: new URLSearchParams(payload).toString() })
+        .then(response => { if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`); return response.json(); })
+        .then(data => {
+            if (loadingMessage) loadingMessage.style.display = 'none';
+            sliderElement.innerHTML = '';
+
+            if (data.success && Array.isArray(data.items)) {
+                const filteredItems = data.items.filter(item => item.type === config.typeToFilter);
+
+                if (filteredItems.length === 0) {
+                    sliderElement.innerHTML = `<p style="text-align: center; padding: 20px; color: #555;">No ${config.typeToFilter.toLowerCase()} items available.</p>`;
+                    disableControls(); return;
+                }
+
+                const slideClass = config.typeToFilter === 'Gallery' ? 'gallery-slide' : 'slide';
+                filteredItems.forEach(item => {
+                    const slideDiv = document.createElement('div');
+                    slideDiv.className = `${slideClass} animate-on-scroll fade-in`; // No 'active' class initially
+                    const fullName = item.name || 'Saree'; const fullInfo = item.info || '';
+                    slideDiv.dataset.fullName = fullName; slideDiv.dataset.fullInfo = fullInfo;
+                    const img = document.createElement('img');
+                    const imageSrc = item.link || 'images/placeholder.jpg';
+                    img.src = imageSrc; img.alt = item.alt || fullName; img.loading = 'lazy';
+                    img.onerror = (e) => { e.target.src='images/placeholder.jpg'; e.target.alt='Image load error'; };
+                    const infoDiv = document.createElement('div'); infoDiv.className = 'item-info';
+                    const h3 = document.createElement('h3'); h3.textContent = truncateText(fullName, TRUNCATE_LENGTH);
+                    const p = document.createElement('p'); p.textContent = truncateText(fullInfo, TRUNCATE_LENGTH);
+                    infoDiv.appendChild(h3); infoDiv.appendChild(p);
+                    slideDiv.appendChild(img); slideDiv.appendChild(infoDiv);
+                    sliderElement.appendChild(slideDiv);
+                });
+
+                // Re-initialize features AFTER dynamic content is added
+                setTimeout(() => {
+                    setupSlider(config.sliderId, config.prevBtnId, config.nextBtnId);
+                    setupModalListeners(`#${config.sliderId} .${slideClass} img`);
+                    observeElements(); // Observe new elements
+                }, 100);
+
+            } else { throw new Error(data.message || "Invalid data format"); }
+        })
+        .catch(error => { showError(error.message); });
     }
 
-}); // End DOMContentLoaded
+
+    // --- Initializations on Page Load ---
+    const galleryConfig = { sliderId: 'gallerySlider', typeToFilter: 'Gallery', prevBtnId: 'galleryPrevBtn', nextBtnId: 'galleryNextBtn', loadingMsgId: 'gallery-loading-message' };
+    const newArrivalsConfig = { sliderId: 'newArrivalsSlider', typeToFilter: 'NewArrival', prevBtnId: 'newArrivalsPrevBtn', nextBtnId: 'newArrivalsNextBtn', loadingMsgId: 'new-arrivals-loading-message' };
+
+    loadAndDisplayItems(galleryConfig);
+    loadAndDisplayItems(newArrivalsConfig);
+    observeElements(); // Observe static elements initially
+
+}); // --- End DOMContentLoaded ---
