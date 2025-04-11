@@ -1,6 +1,21 @@
+// ==========================================================================
+// ========================== CONFIGURATION =================================
+// ==========================================================================
+
 // !!! IMPORTANT: Replace with your DEPLOYED Google Apps Script Web App URL !!!
-// This URL is used to fetch Gallery and New Arrivals data.
+// This URL is used to FETCH Gallery and New Arrivals data.
 const CONTENT_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbynJVLQR_1H2VWYCIM5gBIpgNppCqq9QVXJTYLNq3QM9rY_NAwOTUZBJVexMNhJW9NX/exec";
+
+// !!! IMPORTANT: Replace with your DEPLOYED Google Apps Script Web App URL !!!
+// This URL is used to SUBMIT the Contact Form data.
+const scriptURL_contact = "https://script.google.com/macros/s/AKfycbygnC1RLbNRwmCUml6js7jQK4m5JGnGmaWq92i-q_WeKo06_dKq7dJ_5VLN2GfzENqu/exec";
+
+// Optional: Path to a placeholder image if gallery/arrival images fail to load
+const PLACEHOLDER_IMAGE_PATH = 'images/placeholder.png'; // Create this image or change the path
+
+// ==========================================================================
+// ========================== MAIN SCRIPT LOGIC =============================
+// ==========================================================================
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -50,11 +65,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const newArrivalsSliderContainer = document.getElementById('newArrivalsSlider'); // Get container
 
     function openModal(imgElement) {
-         if (!modal || !modalImg || !captionText) return;
+         if (!modal || !modalImg || !captionText || !imgElement) return;
 
          modal.style.display = "block";
          document.body.style.overflow = 'hidden'; // Prevent background scrolling
-         modalImg.src = imgElement.src;
+         modalImg.src = imgElement.src; // Set image source
 
          // Try to get caption from parent slide's h3 tag
          let itemCaption = imgElement.alt; // Default to alt text
@@ -63,28 +78,38 @@ document.addEventListener('DOMContentLoaded', () => {
              const h3 = parentSlide.querySelector('h3');
              if (h3) itemCaption = h3.textContent;
          }
-         captionText.innerHTML = itemCaption;
+         captionText.innerHTML = itemCaption; // Set caption text
     }
 
     function setupModalListeners() {
-        if (!modal || !closeModalBtn) return;
+        if (!modal || !closeModalBtn) {
+            console.warn("Modal elements not found, cannot set up listeners.");
+            return;
+        }
 
          // Use event delegation on slider containers
         if (gallerySliderContainer) {
             gallerySliderContainer.addEventListener('click', (event) => {
                 // Check if the clicked element is an IMG within a slide (and not a clone)
-                if (event.target.tagName === 'IMG' && event.target.closest('.gallery-slide:not(.clone)')) {
-                     openModal(event.target);
+                const imgTarget = event.target.closest('.gallery-slide:not(.clone) img');
+                if (imgTarget) {
+                     openModal(imgTarget);
                 }
             });
+        } else {
+             console.warn("Gallery slider container not found for modal listener.");
         }
+
          if (newArrivalsSliderContainer) {
              newArrivalsSliderContainer.addEventListener('click', (event) => {
                  // Check if the clicked element is an IMG within a slide (and not a clone)
-                 if (event.target.tagName === 'IMG' && event.target.closest('.slide:not(.clone)')) {
-                     openModal(event.target);
+                 const imgTarget = event.target.closest('.slide:not(.clone) img');
+                 if (imgTarget) {
+                     openModal(imgTarget);
                  }
              });
+         } else {
+              console.warn("New Arrivals slider container not found for modal listener.");
          }
 
 
@@ -95,9 +120,18 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // Event listeners for closing the modal
-        if(closeModalBtn) closeModalBtn.onclick = closeModalAction;
-        if(modal) modal.onclick = function(event) { if (event.target === modal) { closeModalAction(); } }
-        document.addEventListener('keydown', (event) => { if (event.key === 'Escape' && modal && modal.style.display === "block") { closeModalAction(); } });
+        closeModalBtn.onclick = closeModalAction;
+        modal.onclick = function(event) {
+             // Close if clicked on the modal background, not the image itself
+             if (event.target === modal) {
+                 closeModalAction();
+             }
+        }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && modal && modal.style.display === "block") {
+                closeModalAction();
+            }
+        });
     }
     // Call setupModalListeners after DOM loaded (listeners attached to containers, ready for dynamic content)
     setupModalListeners();
@@ -112,6 +146,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         if (!slider || !prevBtn || !nextBtn || !sliderWrapper) {
             console.warn(`Slider setup aborted for: ${sliderId}. Essential elements missing.`);
+            // Attempt to hide controls if they exist but slider/wrapper don't
+            if(prevBtn) prevBtn.style.display = 'none';
+            if(nextBtn) nextBtn.style.display = 'none';
             return;
         }
 
@@ -122,10 +159,12 @@ document.addEventListener('DOMContentLoaded', () => {
              if(originalSlides.length === 1) {
                  prevBtn.style.display = 'none'; // Hide buttons if only one slide
                  nextBtn.style.display = 'none';
+                 sliderWrapper.style.display = 'block'; // Keep wrapper visible for single slide
              } else { // 0 slides
                  prevBtn.style.display = 'none';
                  nextBtn.style.display = 'none';
-                 sliderWrapper.style.display = 'none'; // Hide wrapper if no slides
+                 // Keep wrapper visible to show the "No items found" message if needed
+                 // sliderWrapper.style.display = 'none';
              }
              console.warn(`Slider setup minimal for: ${sliderId}. ${originalSlides.length} slides found.`);
              // Ensure observer finds the single slide if needed
@@ -144,10 +183,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
         // --- Infinite Loop Setup ---
-        // Clear existing clones first in case of re-initialization (though ideally shouldn't happen often)
+        // Clear existing clones first in case of re-initialization
         slider.querySelectorAll('.clone').forEach(clone => clone.remove());
 
-        // 1. Clone first and last slides
+        // 1. Clone first and last *original* slides
         const firstSlideClone = originalSlides[0].cloneNode(true);
         const lastSlideClone = originalSlides[originalSlides.length - 1].cloneNode(true);
         firstSlideClone.classList.add('clone'); // Mark clones
@@ -176,20 +215,21 @@ document.addEventListener('DOMContentLoaded', () => {
             const targetSlide = allSlides[1]; // Use the first real slide for measurement
              if (targetSlide) {
                  const style = window.getComputedStyle(targetSlide);
-                 // Use getBoundingClientRect for more reliable width including transforms/scaling if needed
-                 // For simple translate, offsetWidth + margins should be okay.
                  const marginRight = parseInt(style.marginRight, 10) || 0;
                  const marginLeft = parseInt(style.marginLeft, 10) || 0;
                  slideWidth = targetSlide.offsetWidth + marginLeft + marginRight;
 
-                  // Fallback if width calculation fails
-                   if (slideWidth <= 0) {
-                       slideWidth = sliderWrapper.offsetWidth; // Approx. full width on mobile/tablet
-                        console.warn("Slide width calculation fallback used for", sliderId);
+                  // Fallback if width calculation fails (e.g., display:none parent)
+                   if (slideWidth <= 0 && sliderWrapper.offsetWidth > 0) {
+                       slideWidth = sliderWrapper.offsetWidth / (window.innerWidth >= 992 ? 3 : 1); // Approx based on expected slides visible
+                        console.warn(`Slide width calculation fallback used for ${sliderId}. Approximated: ${slideWidth}`);
+                   } else if (slideWidth <= 0) {
+                        console.error(`Cannot accurately calculate slideWidth for ${sliderId}. Wrapper/Slide might be hidden.`);
+                        slideWidth = 300; // Absolute fallback
                    }
             } else {
-                 slideWidth = sliderWrapper.offsetWidth; // Fallback
-                 console.error("Cannot find target slide for metrics in", sliderId);
+                 slideWidth = sliderWrapper.offsetWidth / (window.innerWidth >= 992 ? 3 : 1); // Fallback if no slides[1]
+                 console.error(`Cannot find target slide[1] for metrics in ${sliderId}. Approximating width.`);
             }
             // console.log(`${sliderId} - slideWidth: ${slideWidth}`);
         }
@@ -201,7 +241,7 @@ document.addEventListener('DOMContentLoaded', () => {
              }
              // Exit if width calculation failed completely
              if (slideWidth <= 0) {
-                 console.error("Cannot update slider position, slideWidth is zero for", sliderId);
+                 console.error(`Cannot update slider ${sliderId} position, slideWidth is zero.`);
                  return;
              };
 
@@ -210,9 +250,9 @@ document.addEventListener('DOMContentLoaded', () => {
             if (instant) {
                  slider.style.transition = 'none'; // Disable transition for instant jump
             } else {
-                 // Check if transition style is already set, prevent overriding if none
+                  // Ensure transition is set if it was none or not set
                   if (slider.style.transition === 'none' || !slider.style.transition) {
-                       slider.style.transition = 'transform 0.5s ease-in-out'; // Set/Re-enable
+                       slider.style.transition = 'transform 0.5s ease-in-out';
                   }
             }
 
@@ -221,36 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
             // If instant jump, force reflow and restore transition setting after a tiny delay
             if (instant) {
                  slider.offsetHeight; // Force reflow
-                 // Using timeout helps ensure the transform applies instantly before transition is restored
                   setTimeout(() => {
                       if (slider.style.transition === 'none') {
                            slider.style.transition = 'transform 0.5s ease-in-out';
                       }
-                  }, 0);
+                  }, 10); // Small delay
             }
         }
 
         function handleTransitionEnd() {
-             // This check helps prevent jumps if the transition wasn't initiated by our code
-             // (e.g., style change during devtools inspection)
-             // However, it might interfere if other scripts trigger transitions, be cautious.
-             // if (!isTransitioning && slider.style.transition !== 'none') {
-             //     console.log(`${sliderId}: Transition end skipped (not initiated by button/swipe)`);
-             //     return;
-             // }
-
              // Check if we landed on a clone and need to jump
-             let jumpNeeded = false;
-             if (currentIndex === 0) { // Landed on the prepended clone (of the last slide)
-                 // console.log(`${sliderId}: Transition end - Jump PREPENDED clone to real LAST`);
+             if (currentIndex === 0) { // Landed on the prepended clone
                  currentIndex = allSlides.length - 2; // Index of the real last slide
                  updateSliderPosition(true); // Instant jump
-                 jumpNeeded = true;
-             } else if (currentIndex === allSlides.length - 1) { // Landed on the appended clone (of the first slide)
-                 // console.log(`${sliderId}: Transition end - Jump APPENDED clone to real FIRST`);
+             } else if (currentIndex === allSlides.length - 1) { // Landed on the appended clone
                  currentIndex = 1; // Index of the real first slide
                  updateSliderPosition(true); // Instant jump
-                 jumpNeeded = true;
              }
 
              // Always reset transitioning flag after transition ends
@@ -261,18 +287,18 @@ document.addEventListener('DOMContentLoaded', () => {
              nextBtn.disabled = false;
         }
 
-        // Add the transitionend listener
-        slider.removeEventListener('transitionend', handleTransitionEnd); // Remove previous listener if any
+        // Add the transitionend listener (ensure only one listener active)
+        slider.removeEventListener('transitionend', handleTransitionEnd);
         slider.addEventListener('transitionend', handleTransitionEnd);
 
         // Button click handlers
         nextBtn.addEventListener('click', () => {
-            if (isTransitioning) return; // Prevent action if already moving
+            if (isTransitioning) return;
             isTransitioning = true;
-            prevBtn.disabled = true; // Disable buttons during transition
+            prevBtn.disabled = true;
             nextBtn.disabled = true;
             currentIndex++;
-            updateSliderPosition(); // Regular transition
+            updateSliderPosition();
         });
 
         prevBtn.addEventListener('click', () => {
@@ -281,7 +307,7 @@ document.addEventListener('DOMContentLoaded', () => {
              prevBtn.disabled = true;
              nextBtn.disabled = true;
              currentIndex--;
-             updateSliderPosition(); // Regular transition
+             updateSliderPosition();
         });
 
         // Debounce function
@@ -296,19 +322,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Update on resize
         const handleResize = () => {
-             // Temporarily disable transition during resize calculation/jump
-             slider.style.transition = 'none';
-             calculateSlideMetrics(); // Recalculate width based on new viewport
-             // Instantly jump to the correct position for the current slide index
-             updateSliderPosition(true);
+             slider.style.transition = 'none'; // Temporarily disable transition
+             calculateSlideMetrics(); // Recalculate width
+             updateSliderPosition(true); // Instantly jump to correct position
         }
         const debouncedResize = debounce(handleResize, 250);
-        window.addEventListener('resize', debouncedResize);
+        // Use ResizeObserver if available for better performance on element resize, fallback to window resize
+        if ('ResizeObserver' in window) {
+             const resizeObserver = new ResizeObserver(debouncedResize);
+             resizeObserver.observe(sliderWrapper);
+        } else {
+            window.addEventListener('resize', debouncedResize);
+        }
+
 
         // Initial setup
         calculateSlideMetrics();
-        // Instantly move to the starting slide position (index 1) without animation
-        updateSliderPosition(true);
+        updateSliderPosition(true); // Instantly move to the starting slide position
 
          // Add animation class to original slides (ensure they are picked up by observer)
          originalSlides.forEach(slide => {
@@ -319,42 +349,39 @@ document.addEventListener('DOMContentLoaded', () => {
     } // --- End setupSlider ---
 
 
-    // --- NEW: Fetch Data and Populate Sliders ---
+    // --- Fetch Data and Populate Sliders ---
     async function fetchAndDisplayData() {
         const galleryContainer = document.getElementById('gallerySlider');
         const arrivalsContainer = document.getElementById('newArrivalsSlider');
+        const defaultErrorMsg = '<p style="color:red; text-align:center; padding: 20px;">Could not load content at this time.</p>';
 
-         // Display loading state (optional)
+         // Display loading state
         if(galleryContainer) galleryContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Loading gallery...</p>';
         if(arrivalsContainer) arrivalsContainer.innerHTML = '<p style="text-align:center; padding: 20px;">Loading new arrivals...</p>';
 
-
-        // Check if URL is set
-        if (CONTENT_SCRIPT_URL === "YOUR_DEPLOYED_APPS_SCRIPT_URL_HERE" || !CONTENT_SCRIPT_URL) {
+        // Check if URL is set correctly
+        if (CONTENT_SCRIPT_URL === "YOUR_APPS_SCRIPT_URL_FOR_GALLERY_AND_ARRIVALS_HERE" || !CONTENT_SCRIPT_URL) {
              console.error("CRITICAL: Set the CONTENT_SCRIPT_URL variable in script.js");
              const errorMsg = '<p style="color:red; text-align:center; padding: 20px;">Error: Content URL not configured.</p>';
              if(galleryContainer) galleryContainer.innerHTML = errorMsg;
              if(arrivalsContainer) arrivalsContainer.innerHTML = errorMsg;
-             // Hide slider controls if URL is missing
              document.querySelectorAll('.slider-btn').forEach(btn => btn.style.display = 'none');
-             return; // Stop if URL is missing
+             return;
         }
 
         try {
-            // Append timestamp to prevent caching if needed, but GAS usually handles this.
-            // const fetchUrl = `${CONTENT_SCRIPT_URL}?action=getData&t=${new Date().getTime()}`;
-            const fetchUrl = `${CONTENT_SCRIPT_URL}?action=getData`;
-            const response = await fetch(fetchUrl);
+            const fetchUrl = `${CONTENT_SCRIPT_URL}?action=getData&v=${Date.now()}`; // Add cache-busting param
+            const response = await fetch(fetchUrl, { cache: 'no-store' }); // Try to prevent caching
+
             if (!response.ok) {
-                 // Try to get error message from response body
-                 let errorData;
-                 try { errorData = await response.json(); } catch (e) { /* Ignore if not JSON */ }
-                 throw new Error(`HTTP error! Status: ${response.status} ${response.statusText}. ${errorData?.error || ''}`);
+                 let errorData = { message: `HTTP error! Status: ${response.status} ${response.statusText}`};
+                 try { errorData = await response.json(); } catch (e) { /* Ignore if body isn't JSON */ }
+                 throw new Error(errorData.error || errorData.message || `Failed to fetch content.`);
             }
             const data = await response.json();
 
             if(data.error){ // Check for error message from GAS itself
-                throw new Error(`GAS Error: ${data.error}`);
+                throw new Error(`Data Error: ${data.error}`);
             }
 
             let galleryHasItems = false;
@@ -363,34 +390,28 @@ document.addEventListener('DOMContentLoaded', () => {
             // --- Populate Gallery ---
             if (galleryContainer) {
                 galleryContainer.innerHTML = ''; // Clear loading/existing
-                if (data.gallery && data.gallery.length > 0) {
+                if (data.gallery && Array.isArray(data.gallery) && data.gallery.length > 0) {
                     galleryHasItems = true;
                     data.gallery.forEach(item => {
+                        // Basic validation of item structure
+                        if (!item || !item.ImageURL) return;
+
                         const slide = document.createElement('div');
-                        slide.className = 'gallery-slide'; // Base class
-                        // Add animation class here so observer can pick it up later
-                        slide.classList.add('animate-on-scroll', 'fade-in');
+                        slide.className = 'gallery-slide animate-on-scroll fade-in'; // Add animation classes
                         if (item.Category) {
-                            slide.dataset.category = item.Category.toLowerCase().trim();
+                            slide.dataset.category = String(item.Category).toLowerCase().trim();
                         }
 
                         const img = document.createElement('img');
-                        img.src = item.ImageURL || 'images/placeholder.png'; // Add a fallback image path
-                        img.alt = item.Title || 'Gallery Saree'; // Use Title for Alt text
+                        img.src = item.ImageURL;
+                        img.alt = item.Title || 'Gallery Saree';
                         img.loading = 'lazy';
-                        img.onerror = () => { // Handle image loading errors
-                            console.warn(`Image failed to load: ${img.src}. Replacing with placeholder.`);
-                            img.src = 'images/placeholder.png'; // Path to your placeholder image
-                            img.alt = 'Image unavailable';
-                        };
-
+                        img.onerror = () => { img.src = PLACEHOLDER_IMAGE_PATH; img.alt = 'Image unavailable'; };
 
                         const itemInfo = document.createElement('div');
                         itemInfo.className = 'item-info';
-
                         const title = document.createElement('h3');
                         title.textContent = item.Title || 'Saree';
-
                         const description = document.createElement('p');
                         description.textContent = item.Description || '';
 
@@ -400,35 +421,31 @@ document.addEventListener('DOMContentLoaded', () => {
                         slide.appendChild(itemInfo);
                         galleryContainer.appendChild(slide);
                     });
-                } else {
-                     galleryContainer.innerHTML = '<p style="text-align:center; padding: 20px;">No gallery items found.</p>';
                 }
+                 if (!galleryHasItems) {
+                     galleryContainer.innerHTML = '<p style="text-align:center; padding: 20px;">No gallery items found.</p>';
+                 }
             }
 
             // --- Populate New Arrivals ---
             if (arrivalsContainer) {
                 arrivalsContainer.innerHTML = ''; // Clear loading/existing
-                if (data.newArrivals && data.newArrivals.length > 0) {
+                if (data.newArrivals && Array.isArray(data.newArrivals) && data.newArrivals.length > 0) {
                     arrivalsHasItems = true;
                     data.newArrivals.forEach(item => {
+                        if (!item || !item.ImageURL) return;
+
                         const slide = document.createElement('div');
-                        slide.className = 'slide'; // Base class
-                        // Add animation class here
-                        slide.classList.add('animate-on-scroll', 'fade-in');
+                        slide.className = 'slide animate-on-scroll fade-in'; // Add animation classes
 
                         const img = document.createElement('img');
-                        img.src = item.ImageURL || 'images/placeholder.png'; // Add a fallback image path
-                        img.alt = item.Title || 'New Arrival Saree'; // Use Title for Alt text
+                        img.src = item.ImageURL;
+                        img.alt = item.Title || 'New Arrival Saree';
                         img.loading = 'lazy';
-                         img.onerror = () => { // Handle image loading errors
-                            console.warn(`Image failed to load: ${img.src}. Replacing with placeholder.`);
-                            img.src = 'images/placeholder.png'; // Path to your placeholder image
-                            img.alt = 'Image unavailable';
-                        };
+                        img.onerror = () => { img.src = PLACEHOLDER_IMAGE_PATH; img.alt = 'Image unavailable'; };
 
                         const title = document.createElement('h3');
                         title.textContent = item.Title || 'New Arrival';
-
                         const description = document.createElement('p');
                         description.textContent = item.Description || '';
 
@@ -437,17 +454,16 @@ document.addEventListener('DOMContentLoaded', () => {
                         slide.appendChild(description);
                         arrivalsContainer.appendChild(slide);
                     });
-                 } else {
+                 }
+                 if (!arrivalsHasItems) {
                      arrivalsContainer.innerHTML = '<p style="text-align:center; padding: 20px;">No new arrivals found.</p>';
                  }
             }
 
-             // --- IMPORTANT: Initialize Sliders AFTER elements are added ---
-             // Call setupSlider here if data was successfully loaded for them
+             // --- Initialize Sliders AFTER elements are added ---
              if (galleryHasItems) {
                 setupSlider('gallerySlider', 'galleryPrevBtn', 'galleryNextBtn');
              } else {
-                // Hide slider controls if no slides
                 const galleryPrev = document.getElementById('galleryPrevBtn');
                 const galleryNext = document.getElementById('galleryNextBtn');
                 if(galleryPrev) galleryPrev.style.display = 'none';
@@ -463,16 +479,14 @@ document.addEventListener('DOMContentLoaded', () => {
                 if(arrivalsNext) arrivalsNext.style.display = 'none';
              }
 
-             // Re-run observer setup AFTER dynamic content is added AND layout is stable
-             // Use a small timeout to ensure browser has rendered the new elements
-             setTimeout(observeElements, 100);
+             // Re-run observer setup AFTER dynamic content is added
+             setTimeout(observeElements, 100); // Small delay for rendering
 
 
         } catch (error) {
             console.error('Failed to fetch or display content:', error);
-            const errorMsg = `<p style="color:red; text-align:center; padding: 20px;">Error loading content: ${error.message}</p>`;
-            if(galleryContainer) galleryContainer.innerHTML = errorMsg;
-            if(arrivalsContainer) arrivalsContainer.innerHTML = errorMsg;
+            if(galleryContainer) galleryContainer.innerHTML = defaultErrorMsg;
+            if(arrivalsContainer) arrivalsContainer.innerHTML = defaultErrorMsg;
             // Hide slider controls on error
              document.querySelectorAll('.slider-btn').forEach(btn => btn.style.display = 'none');
         }
@@ -483,16 +497,13 @@ document.addEventListener('DOMContentLoaded', () => {
     let observer; // Define observer in a scope accessible by observeElements
 
     function observeElements() {
-        // Disconnect previous observer if exists, to avoid observing old elements
-        if (observer) {
+        if (observer) { // Disconnect previous observer if exists
             observer.disconnect();
         }
 
-        // Target elements with class 'animate-on-scroll' that are NOT already visible
-        // Important: Exclude clones from being observed for animation
         const animatedElements = document.querySelectorAll('.animate-on-scroll:not(.is-visible):not(.clone)');
+        if(animatedElements.length === 0) return; // No elements to observe
 
-        // Re-create observer instance
         observer = new IntersectionObserver((entries, observerInstance) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
@@ -501,27 +512,24 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
         }, {
-            threshold: 0.1, // Trigger when 10% of the element is visible
-            // Optional: Adjust rootMargin if elements are inside scrollable containers
-            // rootMargin: "0px 0px -50px 0px" // Example: Trigger slightly before fully in view
+            threshold: 0.1, // Trigger when 10% is visible
+            // rootMargin: "0px 0px -5% 0px" // Optional: Trigger slightly before entering viewport
         });
 
-
         animatedElements.forEach(el => {
-             // Only observe elements that are currently displayed
-             if (window.getComputedStyle(el).display !== 'none') {
+             if (window.getComputedStyle(el).display !== 'none') { // Only observe visible elements
                  observer.observe(el);
              }
         });
     }
-    // Initial observeElements call will happen after fetchAndDisplayData completes
+    // Initial observation will be triggered after fetchAndDisplayData completes
 
 
     // --- Back to Top Button ---
     const backToTopButton = document.getElementById("back-to-top-btn");
     if (backToTopButton) {
-        const scrollThreshold = 300; // Pixels to scroll before showing button
-        let isButtonVisible = false;
+        const scrollThreshold = 300;
+        let isButtonVisible = window.scrollY > scrollThreshold; // Check initial state
 
         const toggleVis = () => {
             const shouldBeVisible = window.scrollY > scrollThreshold;
@@ -531,72 +539,71 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         };
 
-        // Initial check in case page loads already scrolled
-        toggleVis();
-
+        toggleVis(); // Set initial visibility
         window.addEventListener('scroll', toggleVis, { passive: true });
 
         backToTopButton.addEventListener("click", (e) => {
-            e.preventDefault(); // Prevent potential hash jump if it were an anchor
+            e.preventDefault();
             window.scrollTo({ top: 0, behavior: 'smooth' });
         });
     }
 
 
     // --- Google Sheet Contact Form Submission ---
-    // Ensure this URL is specifically for the CONTACT form submission script, if different from content script
-    const scriptURL_contact = 'https://script.google.com/macros/s/AKfycbx9dCFy_hZu2wFZu60NZgQQ_rT1ZcLXqQ8ahbHRtQc31AJ2khUMSm4vCawWBpvubjLEGA/exec'; // *** VERIFY THIS URL ***
-    const form = document.forms['submit-to-google-sheet']; // Make sure your form has name="submit-to-google-sheet"
+    const form = document.forms['submit-to-google-sheet']; // Ensure form has name="submit-to-google-sheet"
     const formStatus = document.getElementById('form-status');
     const submitButton = form ? form.querySelector('button[type="submit"]') : null;
 
-    if (form && submitButton && formStatus) {
-        form.addEventListener('submit', e => {
-            e.preventDefault();
-            submitButton.disabled = true;
-            formStatus.textContent = 'Sending...';
-            formStatus.className = 'form-status'; // Reset classes
+    // Check if the contact script URL is properly set
+    const isContactUrlSet = scriptURL_contact && scriptURL_contact !== "YOUR_APPS_SCRIPT_URL_FOR_CONTACT_FORM_HERE";
 
-            fetch(scriptURL_contact, { method: 'POST', body: new FormData(form)})
-                .then(response => {
-                     // Check if the response status is indicative of success, even if opaque or non-JSON
-                     // Google Apps Script often returns 302 redirect on success when called via fetch form submission
-                     // Or it might return 200 with success message
-                     if (response.ok || (response.status >= 200 && response.status < 300) || response.type === 'opaque' || response.status === 302) {
-                         // Assuming success if response is ok or redirect
-                         return { result: 'success' }; // Simulate success structure
-                     } else {
-                         // Try to parse error if possible
-                         return response.json().then(errData => {
-                             throw new Error(errData.error || `Server responded with status ${response.status}`);
-                         }).catch(() => { throw new Error(`Server responded with status ${response.status}`); });
-                     }
-                 })
-                .then(data => {
-                     // Check our simulated or actual success indicator
-                     if (data.result === 'success') {
+    if (form && submitButton && formStatus) {
+        if (!isContactUrlSet) {
+             console.error("CRITICAL: Contact form submission URL (scriptURL_contact) is not set in script.js.");
+             formStatus.textContent = 'Cannot submit form: Configuration missing.';
+             formStatus.className = 'form-status error';
+             formStatus.style.display = 'block';
+             submitButton.disabled = true; // Disable submission
+        } else {
+            form.addEventListener('submit', e => {
+                e.preventDefault();
+                submitButton.disabled = true;
+                formStatus.textContent = 'Sending...';
+                formStatus.className = 'form-status'; // Reset classes
+
+                fetch(scriptURL_contact, { method: 'POST', body: new FormData(form)})
+                    .then(response => {
+                         // Google Apps Script deployed as 'Anyone' often returns an opaque redirect or simple text/html success
+                         // We can't always parse JSON reliably, so check response.ok or status codes
+                         if (response.ok || (response.status >= 200 && response.status < 400)) {
+                             // Assume success if status is OK or a redirect (3xx)
+                             return response.text(); // Consume body even if not used directly
+                         } else {
+                             // Try to get error details if server sent specific error
+                             return response.json().then(errData => {
+                                 throw new Error(errData.message || errData.error || `Server error ${response.status}`);
+                             }).catch(() => { throw new Error(`Server error ${response.status}`); });
+                         }
+                     })
+                    .then(() => { // If fetch resolved without throwing error above
                          formStatus.textContent = 'Message sent successfully!';
                          formStatus.classList.add('success');
                          form.reset();
                          submitButton.disabled = false;
                          setTimeout(() => { formStatus.textContent = ''; formStatus.className = 'form-status'; }, 5000);
-                     } else {
-                         // This case might not be reached if errors are thrown above
-                         throw new Error(data.error || 'Submission failed with non-success result.');
-                     }
-                })
-                .catch(error => {
-                    console.error('Form Error!', error);
-                    formStatus.textContent = 'Error sending message. Please try again.';
-                    formStatus.classList.add('error');
-                    submitButton.disabled = false;
-                     setTimeout(() => { formStatus.textContent = ''; formStatus.className = 'form-status'; }, 5000);
-                });
-        });
+                    })
+                    .catch(error => {
+                        console.error('Contact Form Error!', error);
+                        formStatus.textContent = `Error: ${error.message || 'Could not send message.'}`;
+                        formStatus.classList.add('error');
+                        submitButton.disabled = false;
+                         setTimeout(() => { formStatus.textContent = ''; formStatus.className = 'form-status'; }, 7000); // Show error longer
+                    });
+            });
+        }
     } else {
         if (!form) console.warn("Contact form with name='submit-to-google-sheet' not found.");
-        if (form && !submitButton) console.warn("Submit button not found within the contact form.");
-        if (form && !formStatus) console.warn("Element with id='form-status' not found for contact form feedback.");
+        // Optionally display a message if the form elements are missing
     }
     // --- End Google Sheet Contact Form Submission ---
 
@@ -605,16 +612,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const currentYearSpan = document.getElementById('current-year');
     if (currentYearSpan) {
         try {
-            // Use Intl for timezone-aware year formatting
             const now = new Date();
-            // Use 'en-IN' locale for India English format, 'Asia/Kolkata' timezone
-            const options = { timeZone: 'Asia/Kolkata', year: 'numeric' };
-            const formatter = new Intl.DateTimeFormat('en-IN', options);
-            currentYearSpan.textContent = formatter.format(now);
+            // Get year based on local time, should be sufficient unless specific timezone logic is critical
+            currentYearSpan.textContent = now.getFullYear().toString();
+             // Alternative using Intl for specific timezone (uncomment if needed)
+             // const options = { timeZone: 'Asia/Kolkata', year: 'numeric' };
+             // const formatter = new Intl.DateTimeFormat('en-IN', options); // 'en-IN' locale for India
+             // currentYearSpan.textContent = formatter.format(now);
         } catch (e) {
-            // Fallback for browsers that might not support Intl or timezone
-            console.warn("Could not get timezone-specific year, using local year.", e);
-            currentYearSpan.textContent = new Date().getFullYear().toString();
+            console.warn("Could not update footer year automatically.", e);
+            // Keep the default year from HTML as fallback
         }
     }
 
